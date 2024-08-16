@@ -4,7 +4,7 @@ import Menu from './components/Menu';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Login from './components/Login';
-// import Register from './components/Register'
+import Register from './components/Register'
 
 const App = () => {
   return (
@@ -12,6 +12,7 @@ const App = () => {
       <Navbar />
       <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
         <Route path="/menu" element={<Menu />} />
       </Routes>
       <Footer />
