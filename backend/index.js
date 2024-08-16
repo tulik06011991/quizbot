@@ -1,8 +1,9 @@
-const express = require('express')
-const app = express()
-require('dotenv').config()
+const express = require('express');
+const app = express();
+require('dotenv').config();
 
+PORT = process.env.PORT ||  5000;  // To'g'ri port raqamini qo'shish
 
-PORT = 8000
-
-app.listen(PORT, console.log('server running on port : 8000'))
+app.listen(PORT, () => {
+    console.log(`Server running on port: ${PORT}`);
+});
