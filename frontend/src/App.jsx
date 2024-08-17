@@ -9,6 +9,7 @@ import NotFound from './components/NotFound';
 import Test from './components/Test';
 import Word from './components/Word';
 import Fanlar from './components/Fanlar';
+import FanlarOquvchi from './components/FanlarOquchi'
 
 
 
@@ -23,6 +24,7 @@ const App = () => {
         <Route path="/test" element={<Test />} />
         <Route path="/word" element={<Word />} />
         <Route path="/fanlar" element={<Fanlar />} />
+        <Route path="/fanlaroquvchi" element={<FanlarOquvchi />} />
         <Route path="*" element={<NotFound />} /> {/* 404 sahifasini qo'shish */}
       </Routes>
       <Footer />
