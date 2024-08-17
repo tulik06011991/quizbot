@@ -2,6 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const mammoth = require('mammoth');
 const TestModel = require('../Model/WordSchema'); // Bazadagi modelni chaqirish
+const { JSDOM } = require('jsdom');
 
 // Multer sozlamalari
 const storage = multer.diskStorage({
@@ -44,7 +45,7 @@ const uploadWordFile = async (req, res) => {
       const fileContent = result.value; // Fayldagi matn
 
       // Fayldan savollarni ajratib olish
-      const questions = parseQuestionsFromText(fileContent); 
+      const questions = parseQuestionsFromHtml(fileContent); 
 
       // Testni bazaga saqlash
       const test = new TestModel({
@@ -62,18 +63,19 @@ const uploadWordFile = async (req, res) => {
 };
 
 // Test ma'lumotlarini parsing qilish (savol/javoblarni ajratib olish uchun funksiya)
-const parseQuestionsFromText = (text) => {
+const parseQuestionsFromHtml = (html) => {
   const questions = [];
-  const lines = text.split('\n').map(line => line.trim()); // Har bir qatorni tozalash
+  const dom = new JSDOM(html);
+  const document = dom.window.document;
 
   let currentQuestion = null;
   let currentOptions = [];
-  let isOption = false;
 
-  lines.forEach((line) => {
-    const questionMatch = line.match(/^(\d+)\.\s(.+)$/);
-    const optionMatch = line.match(/^([A-D])\.\s(.+)$/);
+  document.querySelectorAll('p, li').forEach((element) => {
+    const textContent = element.textContent.trim();
 
+    // Savol aniqlash
+    const questionMatch = textContent.match(/^(\d+)\.\s(.+)$/);
     if (questionMatch) {
       if (currentQuestion) {
         // Oldingi savolni qo'shish
@@ -87,16 +89,20 @@ const parseQuestionsFromText = (text) => {
         options: [],
         correctAnswer: ''
       };
-      isOption = true;
-    } else if (optionMatch && isOption) {
+    } else if (textContent.match(/^[A-D]\.\s.+$/)) {
       // Variantlarni qo'shish
-      currentOptions.push({
-        optionText: optionMatch[2],
-        optionLetter: optionMatch[1]
-      });
-    } else if (line.toLowerCase().startsWith('to\'g\'ri javob:') && currentQuestion) {
-      currentQuestion.correctAnswer = line.replace('To\'g\'ri javob:', '').trim(); // To'g'ri javobni qo'shish
-      isOption = false; // Savol tugadi
+      const optionMatch = textContent.match(/^([A-D])\.\s(.+)$/);
+      if (currentQuestion) {
+        currentQuestion.options.push({
+          optionText: optionMatch[2],
+          optionLetter: optionMatch[1]
+        });
+      }
+    } else if (element.querySelector('b') && currentQuestion) {
+      // Qalin matnni aniqlash
+      if (element.querySelector('b').textContent.trim().toLowerCase() === textContent.toLowerCase()) {
+        currentQuestion.correctAnswer = textContent; // To'g'ri javobni qo'shish
+      }
     }
   });
 
@@ -108,6 +114,7 @@ const parseQuestionsFromText = (text) => {
 
   return questions;
 };
+
 
 
 module.exports = { uploadWordFile };
