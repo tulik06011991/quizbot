@@ -1,41 +1,25 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const Word = () => {
+const WordUpload = () => {
   const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    
-    if (selectedFile) {
-      const fileType = selectedFile.type;
-      const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
-
-      if (!validTypes.includes(fileType)) {
-        setError('Invalid file type. Please upload a Word document (.docx or .doc).');
-        setFile(null); // Clear file if invalid
-      } else {
-        setFile(selectedFile);
-        setError(null); // Clear any previous error
-      }
-    }
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
-  const handleUpload = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     if (!file) {
-      setError('Please select a file first.');
+      setError('Please select a file to upload.');
       return;
     }
 
     const formData = new FormData();
     formData.append('wordFile', file);
-
-    setUploading(true);
-    setSuccess(null);
-    setError(null);
 
     try {
       const response = await axios.post('http://localhost:5000/api/upload', formData, {
@@ -43,44 +27,42 @@ const Word = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
+
       setSuccess(response.data.message);
+      setError(null);
+      setFile(null); // Faylni formdan o'chirish
     } catch (err) {
-      setError(err.response?.data.message || 'An error occurred while uploading.');
-    } finally {
-      setUploading(false);
+      setError(err.response ? err.response.data.message : 'Error uploading file');
+      setSuccess(null);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 to-blue-500">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Upload a Word File</h2>
+    <div className="container mx-auto p-4">
+      <h1 className="text-xl font-semibold mb-4">Upload Word File</h1>
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md">
         <div className="mb-4">
+          <label htmlFor="file" className="block text-sm font-medium text-gray-700">Select Word File</label>
           <input
             type="file"
-            accept=".docx, .doc"
+            id="file"
+            name="wordFile"
+            accept=".doc,.docx"
             onChange={handleFileChange}
-            className="block w-full text-gray-700 bg-gray-100 border border-gray-300 rounded-md p-2"
+            className="mt-1 block w-full text-sm text-gray-800"
           />
         </div>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
         <button
-          onClick={handleUpload}
-          className={`w-full py-3 px-4 text-white font-semibold text-lg rounded-lg ${
-            uploading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
-          }`}
-          disabled={uploading}
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          {uploading ? 'Uploading...' : 'Upload'}
+          Upload
         </button>
-        {success && (
-          <p className="mt-4 text-lg text-green-600 font-semibold">{success}</p>
-        )}
-        {error && (
-          <p className="mt-4 text-lg text-red-600 font-semibold">{error}</p>
-        )}
-      </div>
+      </form>
     </div>
   );
 };
 
-export default Word;
+export default WordUpload;
