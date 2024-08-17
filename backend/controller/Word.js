@@ -43,7 +43,7 @@ const uploadWordFile = async (req, res) => {
       const result = await mammoth.extractRawText({ path: req.file.path });
       const fileContent = result.value; // Fayldagi matn
 
-      // Fayldan savollarni ajratib olish (bu yerda savollarni parsing qilish kerak)
+      // Fayldan savollarni ajratib olish
       const questions = parseQuestionsFromText(fileContent); 
 
       // Testni bazaga saqlash
@@ -56,7 +56,7 @@ const uploadWordFile = async (req, res) => {
       await test.save();
       res.status(200).json({ message: 'Fayl yuklandi va test yaratildi', test });
     } catch (error) {
-      res.status(500).json({ message: 'Faylni saqlashda xatolik yuz berdi', error });
+      res.status(500).json({ message: 'Faylni saqlashda xatolik yuz berdi', error: error.message });
     }
   });
 };
@@ -64,17 +64,30 @@ const uploadWordFile = async (req, res) => {
 // Test ma'lumotlarini parsing qilish (savol/javoblarni ajratib olish uchun funksiya)
 const parseQuestionsFromText = (text) => {
   const questions = [];
-  const lines = text.split('\n');
-  
-  lines.forEach((line, index) => {
-    if (line.startsWith('Savol:')) {
-      questions.push({
+  const lines = text.split('\n').map(line => line.trim()); // Har bir qatorni tozalash
+
+  let currentQuestion = null;
+
+  lines.forEach((line) => {
+    if (line.toLowerCase().startsWith('savol:')) {
+      if (currentQuestion) {
+        questions.push(currentQuestion); // Oldingi savolni qo'shish
+      }
+      currentQuestion = {
         questionText: line.replace('Savol:', '').trim(),
-        options: [lines[index + 1], lines[index + 2], lines[index + 3], lines[index + 4]],
-        correctAnswer: lines[index + 5].replace('To\'g\'ri javob:', '').trim()
-      });
+        options: [],
+        correctAnswer: ''
+      };
+    } else if (currentQuestion && currentQuestion.options.length < 4) {
+      currentQuestion.options.push(line.trim()); // Variantlarni qo'shish
+    } else if (line.toLowerCase().startsWith('to\'g\'ri javob:')) {
+      currentQuestion.correctAnswer = line.replace('To\'g\'ri javob:', '').trim(); // To'g'ri javobni qo'shish
     }
   });
+
+  if (currentQuestion) {
+    questions.push(currentQuestion); // Oxirgi savolni qo'shish
+  }
 
   return questions;
 };

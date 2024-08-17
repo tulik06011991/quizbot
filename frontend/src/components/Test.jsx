@@ -9,14 +9,14 @@ const Test = ({ testId }) => {
     const fetchTest = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/test`);
-        console.log(response)
+       
         setTest(response.data);
       } catch (err) {
         setError('Testni yuklashda xatolik yuz berdi');
       }
     };
     fetchTest();
-  }, [testId]);
+  }, []);
 
   if (error) {
     return <div>{error}</div>;
@@ -25,6 +25,7 @@ const Test = ({ testId }) => {
   if (!test) {
     return <div>Test yuklanmoqda...</div>;
   }
+  console.log(test)
 
   return (
     <div className="test-container">
