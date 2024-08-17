@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const Auth = require('./routes/Auth')
 
 
 const app = express();
@@ -13,7 +14,7 @@ mongoose.connect('mongodb+srv://tolqinmirsaliyev:baliq06011991@cluster0.pjeij25.
   .catch(err => console.log(err));
 
 // Auth route'larni ulash
-
+app.use('/auth', Auth)
 
 // Serverni ishga tushirish
 app.listen(5000, () => {
