@@ -1,23 +1,23 @@
 const mongoose = require('mongoose');
 
-// Savol va javoblar uchun schema
-const optionSchema = new mongoose.Schema({
-  optionText: {
-    type: String,
-    required: true
-  },
-  optionLetter: {
-    type: String,
-    required: true
-  }
-});
-
+// Savollar va variantlar uchun schema
 const questionSchema = new mongoose.Schema({
   questionText: {
     type: String,
     required: true
   },
-  options: [optionSchema], // Variantlar uchun schema
+  options: [
+    {
+      optionText: {
+        type: String,
+        required: true
+      },
+      optionLetter: {
+        type: String,
+        required: true
+      }
+    }
+  ],
   correctAnswer: {
     type: String,
     required: true
@@ -41,6 +41,7 @@ const testSchema = new mongoose.Schema({
   questions: [questionSchema] // Savollar ro'yxati
 });
 
+// Model yaratish
 const TestModel = mongoose.model('Test', testSchema);
 
 module.exports = TestModel;

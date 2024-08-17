@@ -1,16 +1,16 @@
 const multer = require('multer');
 const path = require('path');
 const mammoth = require('mammoth');
-const TestModel = require('../Model/WordSchema'); // Bazadagi modelni chaqirish
 const { JSDOM } = require('jsdom');
+const TestModel = require('../Model/WordSchema'); // Modelni import qilish
 
 // Multer sozlamalari
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Fayl saqlanadigan joy
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname); // Fayl kengaytmasi
+    const ext = path.extname(file.originalname);
     const fileName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now() + ext;
     cb(null, fileName);
   }
@@ -18,9 +18,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 }, // 5MB maksimal hajm
+  limits: { fileSize: 1024 * 1024 * 5 },
   fileFilter: (req, file, cb) => {
-    const fileTypes = /docx|doc/; // Faqat Word fayllari
+    const fileTypes = /docx|doc/;
     const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = fileTypes.test(file.mimetype);
 
@@ -32,46 +32,15 @@ const upload = multer({
   }
 }).single('wordFile');
 
-// Faylni yuklab olish va test ma'lumotlariga aylantirish
-const uploadWordFile = async (req, res) => {
-  upload(req, res, async (err) => {
-    if (err) {
-      return res.status(400).json({ message: err.message });
-    }
-
-    try {
-      // Yuklangan faylni o'qish va tekstga aylantirish
-      const result = await mammoth.extractRawText({ path: req.file.path });
-      const fileContent = result.value; // Fayldagi matn
-
-      // Fayldan savollarni ajratib olish
-      const questions = parseQuestionsFromHtml(fileContent); 
-
-      // Testni bazaga saqlash
-      const test = new TestModel({
-        originalFileName: req.file.originalname,
-        storedFileName: req.file.filename,
-        questions: questions // Savollar bazaga saqlanadi
-      });
-
-      await test.save();
-      res.status(200).json({ message: 'Fayl yuklandi va test yaratildi', test });
-    } catch (error) {
-      res.status(500).json({ message: 'Faylni saqlashda xatolik yuz berdi', error: error.message });
-    }
-  });
-};
-
-// Test ma'lumotlarini parsing qilish (savol/javoblarni ajratib olish uchun funksiya)
-const parseQuestionsFromHtml = (html) => {
-  const questions = [];
+// HTML matnni o'qish va parsing qilish
+const parseHtml = (html) => {
   const dom = new JSDOM(html);
   const document = dom.window.document;
-
+  
+  const questions = [];
   let currentQuestion = null;
-  let currentOptions = [];
 
-  document.querySelectorAll('p, li').forEach((element) => {
+  document.querySelectorAll('p').forEach((element) => {
     const textContent = element.textContent.trim();
 
     // Savol aniqlash
@@ -79,9 +48,7 @@ const parseQuestionsFromHtml = (html) => {
     if (questionMatch) {
       if (currentQuestion) {
         // Oldingi savolni qo'shish
-        currentQuestion.options = currentOptions;
         questions.push(currentQuestion);
-        currentOptions = [];
       }
 
       currentQuestion = {
@@ -101,20 +68,46 @@ const parseQuestionsFromHtml = (html) => {
     } else if (element.querySelector('b') && currentQuestion) {
       // Qalin matnni aniqlash
       if (element.querySelector('b').textContent.trim().toLowerCase() === textContent.toLowerCase()) {
-        currentQuestion.correctAnswer = textContent; // To'g'ri javobni qo'shish
+        currentQuestion.correctAnswer = textContent;
       }
     }
   });
 
-  // Oxirgi savolni qo'shish
   if (currentQuestion) {
-    currentQuestion.options = currentOptions;
     questions.push(currentQuestion);
   }
 
   return questions;
 };
 
+// Faylni yuklash va ma'lumotlarni bazaga saqlash
+const uploadWordFile = async (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
 
+    try {
+      // Yuklangan faylni o'qish va HTMLga aylantirish
+      const result = await mammoth.convertToHtml({ path: req.file.path });
+      const html = result.value;
+      const questions = parseHtml(html);
+
+      // Testni bazaga saqlash
+      const test = new TestModel({
+        originalFileName: req.file.originalname,
+        storedFileName: req.file.filename,
+        questions: questions
+      });
+
+      await test.save();
+      res.status(200).json({ message: 'Fayl yuklandi va test yaratildi', test });
+    } catch (error) {
+      res.status(500).json({ message: 'Faylni saqlashda xatolik yuz berdi', error });
+    }
+  });
+};
+
+// Boshqa kerakli funktsiyalar
 
 module.exports = { uploadWordFile };
