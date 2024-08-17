@@ -61,6 +61,7 @@ const Login = () => {
               type="submit"
               className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
+               <a href="/menu" className="text-blue-500 hover:text-blue-700"></a>
               Login
             </button>
           </div>
