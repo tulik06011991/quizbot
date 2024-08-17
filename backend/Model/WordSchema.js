@@ -18,7 +18,7 @@ const questionSchema = new mongoose.Schema({
   }
 });
 
-// Fayl va test ma'lumotlari uchun schema
+// Test ma'lumotlari uchun schema
 const testSchema = new mongoose.Schema({
   originalFileName: {
     type: String,

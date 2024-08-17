@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Auth = require('./routes/Auth')
 const fileUploadRoutes = require('./routes/Word');
+const Test = require('./routes/Test')
 const path = require('path');
 const cors = require('cors');
 
@@ -22,6 +23,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Fayl yuklash marshrutlarini ulash
 app.use('/api', fileUploadRoutes);
+app.use('/api', Test);
 app.use('/auth', Auth)
 
 // Serverni ishga tushirish
