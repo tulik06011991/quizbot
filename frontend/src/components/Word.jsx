@@ -38,25 +38,25 @@ const WordUpload = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-xl font-semibold mb-4">Upload Word File</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md">
-        <div className="mb-4">
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700">Select Word File</label>
+    <div className="container mx-auto p-4 sm:p-6 md:p-8 lg:p-10">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">Upload Word File</h1>
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+        <div className="mb-6">
+          <label htmlFor="file" className="block text-lg font-medium text-gray-700 mb-2">Select Word File</label>
           <input
             type="file"
             id="file"
             name="wordFile"
             accept=".doc,.docx"
             onChange={handleFileChange}
-            className="mt-1 block w-full text-sm text-gray-800"
+            className="block w-full text-sm text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-        {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
+        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        {success && <p className="text-green-600 text-sm mb-4">{success}</p>}
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
         >
           Upload
         </button>
