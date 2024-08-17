@@ -7,6 +7,7 @@ const cors = require('cors');
 
 
 const app = express();
+app.use(cors())
 
 // Ma'lumotlarni JSON formatda olish uchun middleware
 app.use(express.json());
