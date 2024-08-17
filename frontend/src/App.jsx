@@ -8,6 +8,8 @@ import Register from './components/Register'
 import NotFound from './components/NotFound'; 
 import Test from './components/Test';
 import Word from './components/Word';
+import Fanlar from './components/Fanlar';
+
 
 
 const App = () => {
@@ -20,6 +22,7 @@ const App = () => {
         <Route path="/menu" element={<Menu />} />
         <Route path="/test" element={<Test />} />
         <Route path="/word" element={<Word />} />
+        <Route path="/fanlar" element={<Fanlar />} />
         <Route path="*" element={<NotFound />} /> {/* 404 sahifasini qo'shish */}
       </Routes>
       <Footer />
