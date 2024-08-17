@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Auth = require('./routes/Auth')
 const fileUploadRoutes = require('./routes/Word');
 const path = require('path');
+const cors = require('cors');
 
 
 const app = express();
