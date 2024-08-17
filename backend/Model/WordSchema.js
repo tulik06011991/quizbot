@@ -1,17 +1,23 @@
 const mongoose = require('mongoose');
 
 // Savol va javoblar uchun schema
+const optionSchema = new mongoose.Schema({
+  optionText: {
+    type: String,
+    required: true
+  },
+  optionLetter: {
+    type: String,
+    required: true
+  }
+});
+
 const questionSchema = new mongoose.Schema({
   questionText: {
     type: String,
     required: true
   },
-  options: [
-    {
-      type: String,
-      required: true
-    }
-  ],
+  options: [optionSchema], // Variantlar uchun schema
   correctAnswer: {
     type: String,
     required: true

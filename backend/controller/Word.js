@@ -67,29 +67,47 @@ const parseQuestionsFromText = (text) => {
   const lines = text.split('\n').map(line => line.trim()); // Har bir qatorni tozalash
 
   let currentQuestion = null;
+  let currentOptions = [];
+  let isOption = false;
 
   lines.forEach((line) => {
-    if (line.toLowerCase().startsWith('savol:')) {
+    const questionMatch = line.match(/^(\d+)\.\s(.+)$/);
+    const optionMatch = line.match(/^([A-D])\.\s(.+)$/);
+
+    if (questionMatch) {
       if (currentQuestion) {
-        questions.push(currentQuestion); // Oldingi savolni qo'shish
+        // Oldingi savolni qo'shish
+        currentQuestion.options = currentOptions;
+        questions.push(currentQuestion);
+        currentOptions = [];
       }
+
       currentQuestion = {
-        questionText: line.replace('Savol:', '').trim(),
+        questionText: questionMatch[2],
         options: [],
         correctAnswer: ''
       };
-    } else if (currentQuestion && currentQuestion.options.length < 4) {
-      currentQuestion.options.push(line.trim()); // Variantlarni qo'shish
-    } else if (line.toLowerCase().startsWith('to\'g\'ri javob:')) {
+      isOption = true;
+    } else if (optionMatch && isOption) {
+      // Variantlarni qo'shish
+      currentOptions.push({
+        optionText: optionMatch[2],
+        optionLetter: optionMatch[1]
+      });
+    } else if (line.toLowerCase().startsWith('to\'g\'ri javob:') && currentQuestion) {
       currentQuestion.correctAnswer = line.replace('To\'g\'ri javob:', '').trim(); // To'g'ri javobni qo'shish
+      isOption = false; // Savol tugadi
     }
   });
 
+  // Oxirgi savolni qo'shish
   if (currentQuestion) {
-    questions.push(currentQuestion); // Oxirgi savolni qo'shish
+    currentQuestion.options = currentOptions;
+    questions.push(currentQuestion);
   }
 
   return questions;
 };
+
 
 module.exports = { uploadWordFile };
