@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Auth = require('./routes/Auth')
+const fileUploadRoutes = require('./routes/Word');
+const path = require('path');
 
 
 const app = express();
@@ -14,6 +16,10 @@ mongoose.connect('mongodb+srv://tolqinmirsaliyev:baliq06011991@cluster0.pjeij25.
   .catch(err => console.log(err));
 
 // Auth route'larni ulash
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Fayl yuklash marshrutlarini ulash
+app.use('/api', fileUploadRoutes);
 app.use('/auth', Auth)
 
 // Serverni ishga tushirish
