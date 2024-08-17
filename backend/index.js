@@ -1,9 +1,21 @@
 const express = require('express');
+const mongoose = require('mongoose');
+
+
 const app = express();
-require('dotenv').config();
 
-PORT = process.env.PORT ||  5000;  // To'g'ri port raqamini qo'shish
+// Ma'lumotlarni JSON formatda olish uchun middleware
+app.use(express.json());
 
-app.listen(PORT, () => {
-    console.log(`Server running on port: ${PORT}`);
+// MongoDB'ga ulanish
+mongoose.connect('mongodb+srv://tolqinmirsaliyev:baliq06011991@cluster0.pjeij25.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0' )
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log(err));
+
+// Auth route'larni ulash
+
+
+// Serverni ishga tushirish
+app.listen(5000, () => {
+  console.log('Server running on port 5000');
 });
