@@ -15,9 +15,11 @@ const Test = ({ testId }) => {
         setError('Testni yuklashda xatolik yuz berdi');
       }
     };
+    
     fetchTest();
   }, []);
-
+  
+  console.log(test)
   if (error) {
     return <div>{error}</div>;
   }
