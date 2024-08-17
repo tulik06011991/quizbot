@@ -1,28 +1,40 @@
 const mongoose = require('mongoose');
 
-const fileSchema = new mongoose.Schema({
-  originalName: {
+// Savol va javoblar uchun schema
+const questionSchema = new mongoose.Schema({
+  questionText: {
     type: String,
-    required: true,
+    required: true
   },
-  fileName: {
+  options: [
+    {
+      type: String,
+      required: true
+    }
+  ],
+  correctAnswer: {
     type: String,
-    required: true,
-  },
-  filePath: {
-    type: String,
-    required: true,
-  },
-  fileSize: {
-    type: Number,
-    required: true,
-  },
-  uploadedAt: {
-    type: Date,
-    default: Date.now,
-  },
+    required: true
+  }
 });
 
-const FileModel = mongoose.model('File', fileSchema);
+// Fayl va test ma'lumotlari uchun schema
+const testSchema = new mongoose.Schema({
+  originalFileName: {
+    type: String,
+    required: true
+  },
+  storedFileName: {
+    type: String,
+    required: true
+  },
+  uploadDate: {
+    type: Date,
+    default: Date.now
+  },
+  questions: [questionSchema] // Savollar ro'yxati
+});
 
-module.exports = FileModel;
+const TestModel = mongoose.model('Test', testSchema);
+
+module.exports = TestModel;

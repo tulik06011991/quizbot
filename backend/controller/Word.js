@@ -1,39 +1,39 @@
-const multer = require('multer');
-const path = require('path');
 const fs = require('fs');
-const FileModel = require('../Model/WordSchema'); // Modelni import qilish
+const path = require('path');
+const mammoth = require('mammoth');
+const FileModel = require('../Model/WordSchema');
 
-// Fayllarni saqlash joyi va nomini o'rnatish
+// Fayl yuklash xavfsizligi uchun multer sozlamalari
+const multer = require('multer');
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Fayl saqlanadigan papka
+    cb(null, 'uploads/'); // Fayllar xavfsiz joyda saqlanadi
   },
   filename: (req, file, cb) => {
-    // Fayl nomini tozalash
     const ext = path.extname(file.originalname); // Fayl kengaytmasi
-    const cleanFileName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9]/g, '_'); // Xavfsiz nom
-    cb(null, cleanFileName + '_' + Date.now() + ext); // Fayl nomi vaqtga bog'liq qilib beriladi
+    const cleanFileName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9]/g, '_'); // Xavfsiz fayl nomi
+    cb(null, cleanFileName + '_' + Date.now() + ext); // Fayl nomi vaqt bilan beriladi
   }
 });
 
-// Faylni yuklashni sozlash
+// Fayl yuklashda faqat Word fayllari qabul qilinadi va hajmi 5 MB dan oshmasligi kerak
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 }, // Maksimal fayl o'lchami 5MB
+  limits: { fileSize: 1024 * 1024 * 5 }, // Maksimal hajm: 5MB
   fileFilter: (req, file, cb) => {
-    const fileTypes = /docx|doc/; // Faqat Word fayllari
+    const fileTypes = /docx|doc/;
     const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = fileTypes.test(file.mimetype);
-
     if (extname && mimetype) {
-      return cb(null, true);
+      cb(null, true);
     } else {
-      cb(new Error('Only Word files are allowed!')); // Xatolik xabari
+      cb(new Error('Only Word files are allowed!'));
     }
   }
-}).single('wordFile'); // 'wordFile' - formda faylning nomi
+}).single('wordFile');
 
-// Faylni yuklash controlleri
+// Fayl yuklash va ma'lumotlarni saqlash controlleri
 const uploadWordFile = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -41,37 +41,40 @@ const uploadWordFile = async (req, res) => {
     }
 
     try {
-      // Fayl ma'lumotlarini saqlash
-      const file = new FileModel({
-        originalName: req.file.originalname,
-        fileName: req.file.filename,
-        filePath: req.file.path,
-        fileSize: req.file.size,
-      });
+      const filePath = path.join(__dirname, '../uploads/', req.file.filename);
 
-      await file.save();
+      // Word fayldan ma'lumotlarni chiqarib olish
+      const result = await mammoth.extractRawText({ path: filePath });
+      const text = result.value; // Fayldan olingan matn
 
-      res.status(200).json({
-        message: 'File uploaded and saved successfully',
-        file: req.file
-      });
+      // Ma'lumotlarni test shaklida formatlash
+      const questions = parseTestFromText(text);
+
+      // Ma'lumotlarni bazaga saqlash
+      const savedTest = await saveTestToDatabase(questions);
+
+      res.status(200).json({ message: 'Fayl yuklandi va test ko\'rinishda saqlandi', test: savedTest });
     } catch (error) {
-      res.status(500).json({ message: 'Error saving file metadata' });
+      res.status(500).json({ message: 'Faylni o\'qishda yoki saqlashda xatolik yuz berdi', error: error.message });
     }
   });
 };
 
-// Faylni o'qish va test ko'rinishida taqdim etish
-const presentTest = (req, res) => {
-  const filePath = path.join(__dirname, '../uploads/', req.params.filename);
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ message: 'File not found' });
-  }
-
-  // Faylni o'qish va testga tayyorlash
-  // (Bu yerda faylni o'qish va test ko'rinishida tayyorlash)
-  res.status(200).json({ message: 'Test ready', file: req.params.filename });
+// Test savollarini o'qish va bazaga saqlash
+const parseTestFromText = (text) => {
+  // Matndan test savollarini ajratib olish
+  const questions = text.split("\n").map(line => ({
+    question: line.split("?")[0] + "?",
+    answers: ["A", "B", "C", "D"], // Javoblar avtomatik shakllantiriladi
+    correctAnswer: "A" // To'g'ri javob keyinchalik yangilanadi
+  }));
+  return questions;
 };
 
-module.exports = { uploadWordFile, presentTest };
+// Ma'lumotlarni bazaga saqlash
+const saveTestToDatabase = async (questions) => {
+  const test = new FileModel({ questions });
+  return await test.save();
+};
+
+module.exports = { uploadWordFile };
