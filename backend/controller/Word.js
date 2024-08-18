@@ -63,27 +63,27 @@ const extractQuizData = async (filePath) => {
 
   const quizData = { questions: [] };
   let currentQuestion = null;
-  let questionCount = 0; // Savollar sonini hisoblash
+  let questionCount = 0; // Maksimum 30 ta savol
 
   lines.forEach((line) => {
     if (line.match(/^\d+\./)) {
-      if (currentQuestion) {
+      if (currentQuestion && questionCount < 30) {
         quizData.questions.push(currentQuestion);
       }
-      if (questionCount < 30) { // Maksimum 30 ta savol
+      if (questionCount < 30) {
         currentQuestion = {
           question: line.trim(),
           options: []
         };
         questionCount++;
-      } else {
-        currentQuestion = null;
       }
-    } else if (line.match(/^[A-D]\./) && currentQuestion) {
+    } 
+    else if (line.match(/^[A-D]\./) && currentQuestion) {
       currentQuestion.options.push(line.trim());
     }
   });
 
+  // Oxirgi savolni qo'shish
   if (currentQuestion && questionCount <= 30) {
     quizData.questions.push(currentQuestion);
   }

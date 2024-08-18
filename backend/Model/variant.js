@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const optionSchema = new mongoose.Schema({
   questionId: {
     type: mongoose.Schema.Types.ObjectId,
