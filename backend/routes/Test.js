@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const {getTestById } = require('../controller/Test')
+const { getQuiz } = require('../controller/Test');
 
-// POST route fayl yuklash uchun
-router.post('/test', getTestById );
-
-
+// Savollarni olish marshruti
+router.get('/quiz', getQuiz);
 
 module.exports = router;

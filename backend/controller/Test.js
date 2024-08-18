@@ -1,16 +1,25 @@
-const TestModel = require('../Model/WordSchema');
+const Question = require('../Model/savol');
+const Option = require('../Model/variant');
 
-// Foydalanuvchiga test ko'rsatish
-const getTestById = async (req, res) => {
+const getQuiz = async (req, res, next) => {
   try {
-    const test = await TestModel.find();
-    if (!test) {
-      return res.status(404).json({ message: 'Test topilmadi' });
-    }
-    res.status(200).json(test);
+    const questions = await Question.find();
+    const options = await Option.find().populate('questionId');
+
+    // Savollar va variantlarni birlashtirish
+    const quizData = questions.map(question => {
+      return {
+        question: question.question,
+        options: options
+          .filter(option => option.questionId._id.toString() === question._id.toString())
+          .map(option => option.option)
+      };
+    });
+
+    res.status(200).json(quizData);
   } catch (error) {
-    res.status(500).json({ message: 'Xatolik yuz berdi', error });
+    next(error);
   }
 };
 
-module.exports = { getTestById };
+module.exports = { getQuiz };

@@ -1,79 +1,88 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const WordUpload = () => {
-  const [file, setFile] = useState(null);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const [parsedFile, setParsedFile] = useState(null);
+const Word = () => {
+  const [file, setFile] = useState(null);    // Yuklanadigan faylni saqlash
+  const [uploading, setUploading] = useState(false);  // Yuklash holati
+  const [message, setMessage] = useState(''); // Natija haqida xabar
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    setFile(e.target.files[0]);  // Faylni o'qish
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!file) {
-      setError('Please select a file to upload.');
+      setMessage('Please select a Word file.');
       return;
     }
 
+    setUploading(true);
     const formData = new FormData();
-    formData.append('wordFile', file);
+    formData.append('file', file);
 
     try {
       // Faylni yuklash
-      const response = await axios.post('http://localhost:5000/api/upload', formData, {
+      await axios.post('http://localhost:5000/api//upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-
-      setSuccess(response.data.message);
-      setError(null);
-      setParsedFile(response.data.test); // Parse qilingan fayl ma'lumotlari
-
-      // Ikkinchi so'rov - parse qilingan ma'lumotlarni saqlash
-      await axios.post('http://localhost:5000/api/save-parsed', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      setSuccess('Parsed questions saved to database successfully');
-    } catch (err) {
-      setError(err.response ? err.response.data.message : 'Error uploading file');
-      setSuccess(null);
+      setMessage('File uploaded successfully!');
+    } catch (error) {
+      setMessage('Error uploading file');
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-xl font-semibold mb-4">Upload Word File</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md">
-        <div className="mb-4">
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700">Select Word File</label>
-          <input
-            type="file"
-            id="file"
-            name="wordFile"
-            accept=".doc,.docx"
-            onChange={handleFileChange}
-            className="mt-1 block w-full text-sm text-gray-800"
-          />
+    <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Upload Word File</h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex items-center justify-center w-full">
+          <label className="flex flex-col items-center w-full h-32 border-4 border-dashed rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
+            <div className="flex flex-col items-center justify-center pt-7">
+              <svg
+                className="w-8 h-8 text-gray-500 group-hover:text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M7 16V7a4 4 0 018 0v9m5 4H4m16-4a4 4 0 01-8 0M8 12h8m-4-4v8"
+                ></path>
+              </svg>
+              <p className="pt-1 text-sm text-gray-500">
+                {file ? file.name : 'Click to select a Word file'}
+              </p>
+            </div>
+            <input type="file" className="hidden" onChange={handleFileChange} accept=".doc,.docx" />
+          </label>
         </div>
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-        {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
+
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className={`w-full py-2 px-4 text-white rounded-md ${
+            uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+          }`}
+          disabled={uploading}
         >
-          Upload and Save
+          {uploading ? 'Uploading...' : 'Upload'}
         </button>
       </form>
+
+      {message && (
+        <p className={`mt-4 text-center ${message.includes('successfully') ? 'text-green-500' : 'text-red-500'}`}>
+          {message}
+        </p>
+      )}
     </div>
   );
 };
 
-export default WordUpload;
+export default Word;

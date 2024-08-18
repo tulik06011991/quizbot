@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Auth = require('./routes/Auth')
 const fileUploadRoutes = require('./routes/Word');
+const errorHandler = require('./middleware/errorHandler');
 const Test = require('./routes/Test')
 const path = require('path');
 const cors = require('cors');
@@ -25,7 +26,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/parsed', express.static('parsed'));
 app.use('/api', fileUploadRoutes);
-app.use('/api', Test);
+app.use(errorHandler);
+app.use('/test', Test)
 app.use('/auth', Auth)
 
 // Serverni ishga tushirish
