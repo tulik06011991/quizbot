@@ -6,18 +6,7 @@ const questionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  options: [
-    {
-      optionText: {
-        type: String,
-        required: true
-      },
-      optionLetter: {
-        type: String,
-        required: true
-      }
-    }
-  ],
+  options: [String],
   correctAnswer: {
     type: String,
     required: true
@@ -41,7 +30,6 @@ const testSchema = new mongoose.Schema({
   questions: [questionSchema] // Savollar ro'yxati
 });
 
-// Model yaratish
 const TestModel = mongoose.model('Test', testSchema);
 
 module.exports = TestModel;

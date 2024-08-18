@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { uploadWordFile } = require('../controller/Word');
+const { uploadWordFile, saveParsedQuestions } = require('../controller/Word');
 
-// Faylni yuklash uchun route
+// Word faylni yuklash va parse qilish
 router.post('/upload', uploadWordFile);
+
+// Yangi faylni alohida schema bo'yicha saqlash
+router.post('/save-parsed', saveParsedQuestions);
 
 module.exports = router;

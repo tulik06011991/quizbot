@@ -22,6 +22,8 @@ mongoose.connect('mongodb+srv://tolqinmirsaliyev:baliq06011991@cluster0.pjeij25.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Fayl yuklash marshrutlarini ulash
+
+app.use('/parsed', express.static('parsed'));
 app.use('/api', fileUploadRoutes);
 app.use('/api', Test);
 app.use('/auth', Auth)
