@@ -63,24 +63,28 @@ const extractQuizData = async (filePath) => {
 
   const quizData = { questions: [] };
   let currentQuestion = null;
+  let questionCount = 0; // Savollar sonini hisoblash
 
   lines.forEach((line) => {
     if (line.match(/^\d+\./)) {
       if (currentQuestion) {
         quizData.questions.push(currentQuestion);
       }
-      currentQuestion = {
-        question: line.trim(),
-        options: []
-      };
-    } else if (line.match(/^[A-D]\./)) {
-      if (currentQuestion) {
-        currentQuestion.options.push(line.trim());
+      if (questionCount < 30) { // Maksimum 30 ta savol
+        currentQuestion = {
+          question: line.trim(),
+          options: []
+        };
+        questionCount++;
+      } else {
+        currentQuestion = null;
       }
+    } else if (line.match(/^[A-D]\./) && currentQuestion) {
+      currentQuestion.options.push(line.trim());
     }
   });
 
-  if (currentQuestion) {
+  if (currentQuestion && questionCount <= 30) {
     quizData.questions.push(currentQuestion);
   }
 
