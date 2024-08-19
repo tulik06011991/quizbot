@@ -1,25 +1,26 @@
+// Savollarni va ularning variantlarini olib kelish uchun API
 const Question = require('../Model/savol');
 const Option = require('../Model/variant');
-
-const getQuiz = async (req, res, next) => {
+const getQuiz = async (req, res) => {
   try {
     const questions = await Question.find();
-    const options = await Option.find().populate('questionId');
+    const quiz = [];
 
-    // Savollar va variantlarni birlashtirish
-    const quizData = questions.map(question => {
-      return {
+    // Har bir savol uchun variantlarni va to'g'ri javoblarni yig'ish
+    for (const question of questions) {
+      const options = await Option.find({ questionId: question._id });
+      const correctAnswer = await CorrectAnswer.findOne({ questionId: question._id });
+
+      quiz.push({
         question: question.question,
-        options: options
-          .filter(option => option.questionId._id.toString() === question._id.toString())
-          .map(option => option.option)
-      };
-    });
+        options: options.map(option => option.option),
+        correctAnswer: correctAnswer ? correctAnswer.correctOption : null
+      });
+    }
 
-    res.status(200).json(quizData);
+    res.json(quiz);
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: 'Xatolik yuz berdi' });
   }
 };
-
-module.exports = { getQuiz };
+module.exports = {  getQuiz };

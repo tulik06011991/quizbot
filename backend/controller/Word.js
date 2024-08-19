@@ -4,6 +4,7 @@ const path = require('path');
 const mammoth = require('mammoth');
 const Question = require('../Model/savol');
 const Option = require('../Model/variant');
+const CorrectAnswer = require('../Model/togri');
 
 // Multer sozlamalari
 const storage = multer.diskStorage({
@@ -38,16 +39,23 @@ const uploadQuiz = async (req, res, next) => {
     const filePath = req.file.path;
     const quizData = await extractQuizData(filePath);
 
-    // MongoDB'ga savollar va variantlarni saqlash
+    // MongoDB'ga savollar, variantlar va to'g'ri javoblarni saqlash
     for (const question of quizData.questions) {
       const savedQuestion = await Question.create({ question: question.question });
 
       for (const option of question.options) {
         await Option.create({
-          questionId: savedQuestion._id, // Savol ID sini variantga bog'lash
-          option: option.text,           // Variant matni
-          isCorrect: option.isCorrect    // To'g'ri yoki noto'g'ri variant
+          questionId: savedQuestion._id,
+          option: option.text
         });
+
+        // Agar bu to'g'ri javob bo'lsa, to'g'ri javoblar jadvaliga qo'shamiz
+        if (option.isCorrect) {
+          await CorrectAnswer.create({
+            questionId: savedQuestion._id,
+            correctOption: option.text
+          });
+        }
       }
     }
 
@@ -81,11 +89,11 @@ const extractQuizData = async (filePath) => {
         questionCount++;
       }
     } 
-    else if (line.match(/^[A-D]\./) && currentQuestion) {
-      // Katta harf bilan boshlangan variant to'g'ri javob deb belgilanadi
-      const isCorrect = /[A-D]\.[A-Z]/.test(line);
+    else if (line.match(/^\./) && currentQuestion) {
+      // Nuqta bilan boshlangan variant to'g'ri javob hisoblanadi
+      const isCorrect = line.startsWith('.');
       currentQuestion.options.push({
-        text: line.trim(),
+        text: line.replace(/^\./, '').trim(), // Foydalanuvchiga ko'rsatishda nuqtani olib tashlaymiz
         isCorrect: isCorrect
       });
     }
@@ -99,14 +107,5 @@ const extractQuizData = async (filePath) => {
   return quizData;
 };
 
-// Savollarni va ularning variantlarini olib kelish uchun API
-const getQuiz = async (req, res) => {
-  try {
-    const questions = await Question.find().populate('options');
-    res.json(questions);
-  } catch (error) {
-    res.status(500).json({ message: 'Xatolik yuz berdi' });
-  }
-};
 
-module.exports = { upload, uploadQuiz, getQuiz };
+module.exports = { upload, uploadQuiz };
