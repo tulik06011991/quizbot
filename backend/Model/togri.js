@@ -7,9 +7,8 @@ const correctAnswerSchema = new Schema({
     ref: 'Question',
     required: true
   },
-  correctOptionId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Option',
+  correctOption: {  // Matn sifatida to'g'ri javobni saqlash
+    type: String,
     required: true
   }
 });

@@ -30,6 +30,40 @@ const upload = multer({
 });
 
 // Fayl yuklash va qayta ishlash
+// const uploadQuiz = async (req, res, next) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({ message: 'Fayl yuklanmadi' });
+//     }
+
+//     const filePath = req.file.path;
+//     const quizData = await extractQuizData(filePath);
+
+//     // MongoDB'ga savollar, variantlar va to'g'ri javoblarni saqlash
+//     for (const question of quizData.questions) {
+//       const savedQuestion = await Question.create({ question: question.question });
+
+//       for (const option of question.options) {
+//         const savedOption = await Option.create({
+//           questionId: savedQuestion._id,
+//           option: option.text
+//         });
+
+//         // Agar bu to'g'ri javob bo'lsa, to'g'ri javoblar jadvaliga qo'shamiz
+//         if (option.isCorrect) {
+//           await CorrectAnswer.create({
+//             questionId: savedQuestion._id,
+//             correctOptionId: savedOption._id  // To'g'ri javob ID sini saqlash
+//           });
+//         }
+//       }
+//     }
+
+//     res.status(201).json({ message: 'Quiz muvaffaqiyatli yuklandi va saqlandi' });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 const uploadQuiz = async (req, res, next) => {
   try {
     if (!req.file) {
@@ -53,7 +87,7 @@ const uploadQuiz = async (req, res, next) => {
         if (option.isCorrect) {
           await CorrectAnswer.create({
             questionId: savedQuestion._id,
-            correctOptionId: savedOption._id  // To'g'ri javob ID sini saqlash
+            correctOption: savedOption.option // Bu yerda option matnini saqlaymiz
           });
         }
       }
