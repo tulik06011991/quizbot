@@ -9,6 +9,10 @@ const optionSchema = new mongoose.Schema({
   option: {
     type: String,
     required: true
+  },
+  isCorrect: {
+    type: Boolean,
+    required: true
   }
 });
 

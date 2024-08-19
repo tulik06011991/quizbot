@@ -41,11 +41,12 @@ const uploadQuiz = async (req, res, next) => {
     // MongoDB'ga savollar va variantlarni saqlash
     for (const question of quizData.questions) {
       const savedQuestion = await Question.create({ question: question.question });
-      
+
       for (const option of question.options) {
         await Option.create({
-          questionId: savedQuestion._id,
-          option: option
+          questionId: savedQuestion._id, // Savol ID sini variantga bog'lash
+          option: option.text,           // Variant matni
+          isCorrect: option.isCorrect    // To'g'ri yoki noto'g'ri variant
         });
       }
     }
@@ -67,9 +68,11 @@ const extractQuizData = async (filePath) => {
 
   lines.forEach((line) => {
     if (line.match(/^\d+\./)) {
+      // Agar oldingi savol bo'lsa, uni qo'shamiz
       if (currentQuestion && questionCount < 30) {
         quizData.questions.push(currentQuestion);
       }
+      // Yangi savol yaratish
       if (questionCount < 30) {
         currentQuestion = {
           question: line.trim(),
@@ -79,7 +82,12 @@ const extractQuizData = async (filePath) => {
       }
     } 
     else if (line.match(/^[A-D]\./) && currentQuestion) {
-      currentQuestion.options.push(line.trim());
+      // Katta harf bilan boshlangan variant to'g'ri javob deb belgilanadi
+      const isCorrect = /[A-D]\.[A-Z]/.test(line);
+      currentQuestion.options.push({
+        text: line.trim(),
+        isCorrect: isCorrect
+      });
     }
   });
 
@@ -91,5 +99,14 @@ const extractQuizData = async (filePath) => {
   return quizData;
 };
 
-// Multer middleware va fayl yuklash funksiyasini eksport qilish
-module.exports = { upload, uploadQuiz };
+// Savollarni va ularning variantlarini olib kelish uchun API
+const getQuiz = async (req, res) => {
+  try {
+    const questions = await Question.find().populate('options');
+    res.json(questions);
+  } catch (error) {
+    res.status(500).json({ message: 'Xatolik yuz berdi' });
+  }
+};
+
+module.exports = { upload, uploadQuiz, getQuiz };
