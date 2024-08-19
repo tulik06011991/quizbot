@@ -1,6 +1,5 @@
-
-const mongoose = require('mongoose'); // Mongoose'ni import qilish
-const Schema = mongoose.Schema; // 
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const optionSchema = new Schema({
   questionId: {

@@ -91,10 +91,9 @@ const extractQuizData = async (filePath) => {
     } 
     else if (line.match(/^\./) && currentQuestion) {
       // Nuqta bilan boshlangan variant to'g'ri javob hisoblanadi
-      const isCorrect = line.startsWith('.');
       currentQuestion.options.push({
         text: line.replace(/^\./, '').trim(), // Foydalanuvchiga ko'rsatishda nuqtani olib tashlaymiz
-        isCorrect: isCorrect
+        isCorrect: true
       });
     }
     else if (line.match(/^[A-Za-z]/) && currentQuestion) {
@@ -114,4 +113,26 @@ const extractQuizData = async (filePath) => {
   return quizData;
 };
 
-module.exports = { upload, uploadQuiz };
+// Foydalanuvchiga testni ko'rsatish
+const getQuiz = async (req, res) => {
+  try {
+    const questions = await Question.find();
+    const quiz = [];
+
+    for (const question of questions) {
+      const options = await Option.find({ questionId: question._id });
+      const formattedOptions = options.map(option => option.option); // To'g'ri javoblarni yashirish
+
+      quiz.push({
+        question: question.question,
+        options: formattedOptions
+      });
+    }
+
+    res.json(quiz);
+  } catch (error) {
+    res.status(500).json({ message: 'Xatolik yuz berdi' });
+  }
+};
+
+module.exports = { upload, uploadQuiz, getQuiz };

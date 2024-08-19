@@ -1,11 +1,5 @@
-// models/Question.js
-
-// models/Option.js
-
-// models/CorrectAnswer.js
-
-const mongoose = require('mongoose'); // Mongoose'ni import qilish
-const Schema = mongoose.Schema; // 
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const correctAnswerSchema = new Schema({
   questionId: {
@@ -13,8 +7,9 @@ const correctAnswerSchema = new Schema({
     ref: 'Question',
     required: true
   },
-  correctOption: {
-    type: String,
+  correctOptionId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Option',
     required: true
   }
 });
