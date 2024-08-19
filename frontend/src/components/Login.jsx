@@ -1,13 +1,29 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Login qilish jarayoni
-    alert('Login successfully!');
+
+    try {
+      const response = await axios.post('http://localhost:5000/auth/login', { email, password });
+      
+      alert('Login successful!');
+      console.log('User logged in:', response.data);
+
+      // Token va foydalanuvchi ma'lumotlarini saqlash (masalan, localStorage yoki Context API orqali)
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      // Login bo'lgandan keyin foydalanuvchini boshqa sahifaga yo'naltirish
+      window.location.href = '/menu';
+    } catch (error) {
+      console.error('Login error:', error.response?.data?.message || error.message);
+      alert('Invalid credentials. Please try again.');
+    }
   };
 
   return (
@@ -61,7 +77,6 @@ const Login = () => {
               type="submit"
               className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
-               <a href="/menu" className="text-blue-500 hover:text-blue-700"></a>
               Login
             </button>
           </div>

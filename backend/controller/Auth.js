@@ -4,9 +4,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // JWT secret key
-const JWT_SECRET = 'your_jwt_secret'; // E'tibor bering, bu kalitni .env faylida saqlang
 
 // Register controller
+ // Foydalanuvchi modeli (MongoDB uchun)
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+
 const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -27,20 +30,35 @@ const register = async (req, res) => {
       password: hashedPassword
     });
 
-    // Saqlash
+    // Foydalanuvchini saqlash
     await newUser.save();
 
     // JWT yaratish
     const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(201).json({ token, user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role } });
+    res.status(201).json({
+      token,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
+
+
+
 // Login controller
+ // Foydalanuvchi modeli (MongoDB uchun)
+
+
+
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -60,12 +78,23 @@ const login = async (req, res) => {
     // JWT yaratish
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    res.json({ 
+      token, 
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      } 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+
+
 
 module.exports = {
   login,

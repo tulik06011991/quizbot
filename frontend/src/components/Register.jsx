@@ -1,18 +1,32 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const Register = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert('Passwords do not match!');
       return;
     }
-    // Registration logic here
-    alert('Registration successful!');
+
+    try {
+      const response = await axios.post('http://localhost:5000/auth/register', {
+        name,
+        email,
+        password,
+      });
+
+      alert('Registration successful!');
+      console.log('User registered:', response.data);
+    } catch (error) {
+      console.error('Registration error:', error.response?.data?.message || error.message);
+      alert('Registration failed. Please try again.');
+    }
   };
 
   return (
@@ -21,6 +35,22 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create an Account</h2>
 
         <form onSubmit={handleSubmit}>
+          {/* Name input */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              className="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+              placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+
           {/* Email input */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
