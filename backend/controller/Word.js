@@ -44,7 +44,7 @@ const uploadQuiz = async (req, res, next) => {
       const savedQuestion = await Question.create({ question: question.question });
 
       for (const option of question.options) {
-        await Option.create({
+        const savedOption = await Option.create({
           questionId: savedQuestion._id,
           option: option.text
         });
@@ -53,7 +53,7 @@ const uploadQuiz = async (req, res, next) => {
         if (option.isCorrect) {
           await CorrectAnswer.create({
             questionId: savedQuestion._id,
-            correctOption: option.text
+            correctOptionId: savedOption._id  // To'g'ri javob ID sini saqlash
           });
         }
       }
@@ -97,6 +97,13 @@ const extractQuizData = async (filePath) => {
         isCorrect: isCorrect
       });
     }
+    else if (line.match(/^[A-Za-z]/) && currentQuestion) {
+      // Oddiy variantlar
+      currentQuestion.options.push({
+        text: line.trim(),
+        isCorrect: false
+      });
+    }
   });
 
   // Oxirgi savolni qo'shish
@@ -106,6 +113,5 @@ const extractQuizData = async (filePath) => {
 
   return quizData;
 };
-
 
 module.exports = { upload, uploadQuiz };
