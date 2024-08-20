@@ -10,19 +10,33 @@ const submitQuiz = async (req, res) => {
     const { answers, userId } = req.body; // Foydalanuvchi bergan javoblar va userId
 
     // Foydalanuvchi mavjudligini tekshirish
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID taqdim etilmadi' });
+    }
+
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(400).json({ message: 'Foydalanuvchi topilmadi' });
+      return res.status(404).json({ message: 'Foydalanuvchi topilmadi' });
     }
 
     let correctAnswersCount = 0;
     const totalQuestions = Object.keys(answers).length;
 
+    // Agar savollar mavjud bo'lmasa
+    if (totalQuestions === 0) {
+      return res.status(400).json({ message: 'Savollar mavjud emas' });
+    }
+
     for (let [questionId, userAnswer] of Object.entries(answers)) {
       // To'g'ri javobni olish
       const correctAnswer = await CorrectAnswer.findOne({ questionId: questionId });
 
-      if (correctAnswer && correctAnswer.correctOption === userAnswer) {
+      if (!correctAnswer) {
+        console.error(`Savol ${questionId} uchun to'g'ri javob topilmadi`);
+        continue; // To'g'ri javob topilmasa, davom etish
+      }
+
+      if (correctAnswer.correctOption === userAnswer) {
         correctAnswersCount++;
       }
     }

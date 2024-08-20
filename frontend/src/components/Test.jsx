@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
+const Test = () => {
   const [quizData, setQuizData] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -60,6 +60,8 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
   };
 
   const handleSubmit = async () => {
+    const userId = localStorage.getItem('userId'); // localStorage'dan foydalanuvchi ID'sini olish
+
     try {
       const response = await axios.post('http://localhost:5000/test/submit', {
         userId,   // userIdni yuborish
@@ -69,6 +71,7 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
       setSubmitted(true);
     } catch (error) {
       console.error('Natijani yuborishda xatolik:', error);
+      // Xatolik yuz bersa, foydalanuvchiga xabar bering
     }
   };
 
