@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Navbar from './Navbar'; // Navbarni import qilish
-import Footer from './Footer'; // Footerni import qilish
 
 const Test = () => {
   const [quizData, setQuizData] = useState([]);
@@ -27,7 +25,7 @@ const Test = () => {
   useEffect(() => {
     if (timeLeft > 0 && !submitted) {
       const timer = setInterval(() => {
-        setTimeLeft(timeLeft - 1);
+        setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
 
       return () => clearInterval(timer);
@@ -83,6 +81,7 @@ const Test = () => {
         <h2>Test natijasi:</h2>
         <p>To'g'ri javoblar soni: {result.correctAnswersCount}</p>
         <p>Umumiy savollar soni: {result.totalQuestions}</p>
+        <p>Foiz: {result.scorePercentage.toFixed(2)}%</p>
       </div>
     );
   }
@@ -90,33 +89,34 @@ const Test = () => {
   const question = quizData[currentQuestionIndex];
 
   return (
-    <div>
-      
-      <div style={contentStyles}>
-        <div style={testContainerStyles}>
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', color: timeLeft < 60 ? 'red' : 'black' }}>
+    <div style={contentStyles}>
+      <div style={testContainerStyles}>
+        <div style={{ marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
+          <div style={{ marginTop: '10px' }}>
+            {question.options.map((option, index) => (
+              <div key={index} style={{ marginBottom: '10px' }}>
+                <input
+                  type="radio"
+                  id={`option-${index}`}
+                  name={`question-${currentQuestionIndex}`}
+                  value={option}
+                  checked={answers[currentQuestionIndex] === option}
+                  onChange={() => handleOptionChange(option)}
+                  style={{ marginRight: '10px' }}
+                />
+                <label htmlFor={`option-${index}`} style={{ cursor: 'pointer' }}>{option}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: timeLeft < 60 ? 'red' : 'black', position: 'absolute', top: '10px', right: '10px' }}>
               Vaqt: {formatTime(timeLeft)}
             </div>
-            <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
-            <div style={{ marginTop: '10px' }}>
-              {question.options.map((option, index) => (
-                <div key={index} style={{ marginBottom: '10px' }}>
-                  <input
-                    type="radio"
-                    id={`option-${index}`}
-                    name={`question-${currentQuestionIndex}`}
-                    value={option}
-                    checked={answers[currentQuestionIndex] === option}
-                    onChange={() => handleOptionChange(option)}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <label htmlFor={`option-${index}`} style={{ cursor: 'pointer' }}>{option}</label>
-                </div>
-              ))}
-            </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
             <button
               onClick={handlePreviousQuestion}
               disabled={currentQuestionIndex === 0}
@@ -146,13 +146,12 @@ const Test = () => {
           </div>
         </div>
       </div>
-     {/* Footerni qo'shish */}
     </div>
   );
 };
 
 const contentStyles = {
-  paddingTop: '80px', // Navbarni hisobga olib, ustini bo'sh qoldiramiz
+  paddingTop: '20px', // Timerni yuqoriga joylashtirish uchun bo'sh joy qoldiramiz
   paddingBottom: '60px', // Footer uchun pastda bo'sh joy qoldiramiz
   minHeight: '100vh',
 };
