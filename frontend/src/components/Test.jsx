@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from './Navbar'; // Navbarni import qilish
+import Footer from './Footer'; // Footerni import qilish
 
 const Test = () => {
   const [quizData, setQuizData] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 daqiqa, sekundlarda
 
   useEffect(() => {
-    // Savollar va variantlarni olish
     const fetchQuizData = async () => {
       try {
         const response = await axios.get('http://localhost:5000/test/quiz');
@@ -19,6 +23,24 @@ const Test = () => {
 
     fetchQuizData();
   }, []);
+
+  useEffect(() => {
+    if (timeLeft > 0 && !submitted) {
+      const timer = setInterval(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+
+      return () => clearInterval(timer);
+    } else if (timeLeft === 0) {
+      handleSubmit(); // Vaqt tugashi bilan avtomatik jo'natish
+    }
+  }, [timeLeft, submitted]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
 
   const handleOptionChange = (option) => {
     setAnswers({
@@ -39,64 +61,114 @@ const Test = () => {
     }
   };
 
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/test/submit', {
+        answers
+      });
+      setResult(response.data); 
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Natijani yuborishda xatolik:', error);
+    }
+  };
+
   if (quizData.length === 0) {
     return <div>Yuklanmoqda...</div>;
+  }
+
+  if (submitted && result) {
+    return (
+      <div style={containerStyles}>
+        <h2>Test natijasi:</h2>
+        <p>To'g'ri javoblar soni: {result.correctAnswersCount}</p>
+        <p>Umumiy savollar soni: {result.totalQuestions}</p>
+      </div>
+    );
   }
 
   const question = quizData[currentQuestionIndex];
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
-        <div style={{ marginTop: '10px' }}>
-          {question.options.map((option, index) => (
-            <div key={index} style={{ marginBottom: '10px' }}>
-              <input
-                type="radio"
-                id={`option-${index}`}
-                name={`question-${currentQuestionIndex}`}
-                value={option}
-                checked={answers[currentQuestionIndex] === option}
-                onChange={() => handleOptionChange(option)}
-                style={{ marginRight: '10px' }}
-              />
-              <label htmlFor={`option-${index}`} style={{ cursor: 'pointer' }}>{option}</label>
+    <div>
+      
+      <div style={contentStyles}>
+        <div style={testContainerStyles}>
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: timeLeft < 60 ? 'red' : 'black' }}>
+              Vaqt: {formatTime(timeLeft)}
             </div>
-          ))}
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
+            <div style={{ marginTop: '10px' }}>
+              {question.options.map((option, index) => (
+                <div key={index} style={{ marginBottom: '10px' }}>
+                  <input
+                    type="radio"
+                    id={`option-${index}`}
+                    name={`question-${currentQuestionIndex}`}
+                    value={option}
+                    checked={answers[currentQuestionIndex] === option}
+                    onChange={() => handleOptionChange(option)}
+                    style={{ marginRight: '10px' }}
+                  />
+                  <label htmlFor={`option-${index}`} style={{ cursor: 'pointer' }}>{option}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button
+              onClick={handlePreviousQuestion}
+              disabled={currentQuestionIndex === 0}
+              style={{
+                backgroundColor: '#d3d3d3',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              Oldingi
+            </button>
+            <button
+              onClick={currentQuestionIndex === quizData.length - 1 ? handleSubmit : handleNextQuestion}
+              style={{
+                backgroundColor: '#007bff',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              {currentQuestionIndex === quizData.length - 1 ? 'Yakunlash' : 'Keyingi'}
+            </button>
+          </div>
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button
-          onClick={handlePreviousQuestion}
-          disabled={currentQuestionIndex === 0}
-          style={{
-            backgroundColor: '#d3d3d3',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer'
-          }}
-        >
-          Oldingi
-        </button>
-        <button
-          onClick={handleNextQuestion}
-          disabled={currentQuestionIndex === quizData.length - 1}
-          style={{
-            backgroundColor: '#007bff',
-            color: 'white',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: currentQuestionIndex === quizData.length - 1 ? 'not-allowed' : 'pointer'
-          }}
-        >
-          Keyingi
-        </button>
-      </div>
+     {/* Footerni qo'shish */}
     </div>
   );
+};
+
+const contentStyles = {
+  paddingTop: '80px', // Navbarni hisobga olib, ustini bo'sh qoldiramiz
+  paddingBottom: '60px', // Footer uchun pastda bo'sh joy qoldiramiz
+  minHeight: '100vh',
+};
+
+const testContainerStyles = {
+  padding: '20px',
+  maxWidth: '600px',
+  margin: 'auto',
+  backgroundColor: '#f9f9f9',
+  borderRadius: '10px',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+};
+
+const containerStyles = {
+  textAlign: 'center',
+  margin: '50px 0',
 };
 
 export default Test;

@@ -9,12 +9,12 @@ const getQuiz = async (req, res) => {
     // Har bir savol uchun variantlarni va to'g'ri javoblarni yig'ish
     for (const question of questions) {
       const options = await Option.find({ questionId: question._id });
-      const correctAnswer = await CorrectAnswer.findOne({ questionId: question._id });
+      // const correctAnswer = await CorrectAnswer.findOne({ questionId: question._id });
 
       quiz.push({
         question: question.question,
         options: options.map(option => option.option),
-        correctAnswer: correctAnswer ? correctAnswer.correctOption : null
+        // correctAnswer: correctAnswer ? correctAnswer.correctOption : null
       });
     }
 

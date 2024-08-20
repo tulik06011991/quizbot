@@ -4,6 +4,7 @@ const Auth = require('./routes/Auth')
 const fileUploadRoutes = require('./routes/Word');
 const errorHandler = require('./middleware/errorHandler');
 const Test = require('./routes/Test')
+const javob = require('./routes/Javob')
 const path = require('path');
 const cors = require('cors');
 
@@ -28,6 +29,7 @@ app.use('/parsed', express.static('parsed'));
 app.use('/api', fileUploadRoutes);
 app.use(errorHandler);
 app.use('/test', Test)
+app.use('/', javob)
 app.use('/auth', Auth)
 
 // Serverni ishga tushirish
