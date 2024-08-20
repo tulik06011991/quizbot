@@ -28,7 +28,7 @@ const App = () => {
         
         {/* PrivateRoute orqali himoyalangan sahifalar */}
         <Route path="/fanlaroquvchi/menu" element={<PrivateRoute element={<Menu />} />} />
-        <Route path="/menu/test" element={<PrivateRoute element={<Test />} />} />
+        <Route path="/menu/biologiya" element={<PrivateRoute element={<Test />} />} />
         <Route path="/word" element={<PrivateRoute element={<Word />} />} />
         <Route path="/fanlar" element={<PrivateRoute element={<Fanlar />} />} />
         <Route path="/fanlaroquvchi" element={<PrivateRoute element={<FanlarOquvchi />} />} />

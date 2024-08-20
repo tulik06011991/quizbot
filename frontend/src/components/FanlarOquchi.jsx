@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Navigatsiya uchun import
 
 const subjects = [
   { name: 'Ingliz tili', category: 'Tillar' },
@@ -11,12 +12,18 @@ const subjects = [
 
 const Fanlar = () => {
   const [subjectList, setSubjectList] = useState(subjects);
+  const navigate = useNavigate(); // useNavigate hookini oling
 
   const handleAddSubject = () => {
     const newSubject = prompt('Yangi fan nomini kiriting:');
     if (newSubject) {
       setSubjectList([...subjectList, { name: newSubject, category: 'Yangi fan' }]);
     }
+  };
+
+  const handleSubjectClick = (subject) => {
+    // Har bir fan uchun navigatsiya
+    navigate(`/menu/${subject.name.toLowerCase().replace(/\s+/g, '-')}`);
   };
 
   return (
@@ -35,7 +42,8 @@ const Fanlar = () => {
           {subjectList.map((subject, index) => (
             <div
               key={index}
-              className="p-6 bg-white rounded-lg shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105"
+              onClick={() => handleSubjectClick(subject)} // Fan bosilganda navigatsiya qilish
+              className="p-6 bg-white rounded-lg shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 cursor-pointer"
             >
               <h2 className="text-xl font-bold text-gray-700 mb-2">{subject.name}</h2>
               <p className="text-gray-600">{subject.category}</p>
