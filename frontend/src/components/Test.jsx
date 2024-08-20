@@ -25,11 +25,11 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
   useEffect(() => {
     if (timeLeft > 0 && !submitted) {
       const timer = setInterval(() => {
-        setTimeLeft(prevTimeLeft => prevTimeLeft - 1);
+        setTimeLeft(timeLeft - 1);
       }, 1000);
 
       return () => clearInterval(timer);
-    } else if (timeLeft === 0 && !submitted) {
+    } else if (timeLeft === 0) {
       handleSubmit(); // Vaqt tugashi bilan avtomatik jo'natish
     }
   }, [timeLeft, submitted]);
@@ -47,9 +47,24 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
     });
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < quizData.length - 1) {
+  const handleNextQuestion = async () => {
+    // So'nggi savol bo'lsa, serverga javoblarni yuborish
+    if (currentQuestionIndex === quizData.length - 1) {
+      await handleSubmit();
+    } else {
+      // Aks holda, keyingi savolga o'tish
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+
+      // Har bir savolni yuborish
+      try {
+        await axios.post('http://localhost:5000/test/answer', {
+          userId,
+          questionId: quizData[currentQuestionIndex].id,
+          userAnswer: answers[currentQuestionIndex]
+        });
+      } catch (error) {
+        console.error('Javob yuborishda xatolik:', error);
+      }
     }
   };
 
@@ -65,7 +80,7 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
         userId,   // userIdni yuborish
         answers
       });
-      setResult(response.data); 
+      setResult(response.data);
       setSubmitted(true);
     } catch (error) {
       console.error('Natijani yuborishda xatolik:', error);
@@ -133,7 +148,7 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
             Oldingi
           </button>
           <button
-            onClick={currentQuestionIndex === quizData.length - 1 ? handleSubmit : handleNextQuestion}
+            onClick={handleNextQuestion}
             style={{
               backgroundColor: '#007bff',
               color: 'white',

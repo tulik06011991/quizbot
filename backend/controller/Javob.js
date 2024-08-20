@@ -1,6 +1,4 @@
 const express = require('express');
-const Question = require('../Model/savol');
-const Option = require('../Model/variant');
 const CorrectAnswer = require('../Model/togri');
 const Answer = require('../Model/JavobModel'); // Javoblar schemasi
 const User = require('../Model/ModelSchema'); // User schemasi
