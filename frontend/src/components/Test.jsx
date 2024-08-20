@@ -25,11 +25,11 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
   useEffect(() => {
     if (timeLeft > 0 && !submitted) {
       const timer = setInterval(() => {
-        setTimeLeft(timeLeft - 1);
+        setTimeLeft(prevTimeLeft => prevTimeLeft - 1);
       }, 1000);
 
       return () => clearInterval(timer);
-    } else if (timeLeft === 0) {
+    } else if (timeLeft === 0 && !submitted) {
       handleSubmit(); // Vaqt tugashi bilan avtomatik jo'natish
     }
   }, [timeLeft, submitted]);
