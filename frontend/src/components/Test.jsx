@@ -22,7 +22,7 @@ const Test = () => {
     }, 1000);
 
     // Savollarni olish
-    axios.get('/api/questions')
+    axios.get('http://localhost:5000/test/quiz')
       .then(response => {
         setQuestions(response.data);
       })
@@ -52,7 +52,7 @@ const Test = () => {
     }
 
     try {
-      const response = await axios.post('/api/submit-quiz', { answers, userId });
+      const response = await axios.post('http://localhost:5000/test/submit', { answers, userId });
       setResult(response.data);
     } catch (error) {
       console.error('Testni yuborishda xatolik:', error);
