@@ -40,31 +40,30 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
-  const handleOptionChange = (option) => {
-    setAnswers({
-      ...answers,
-      [currentQuestionIndex]: option
+  const handleOptionChange = async (option) => {
+    const questionId = quizData[currentQuestionIndex].id; // Savol IDni olish
+    setAnswers(prevAnswers => {
+      const newAnswers = {
+        ...prevAnswers,
+        [questionId]: option
+      };
+
+      // Har bir variant tanlanganda javobni serverga yuborish
+      axios.post('http://localhost:5000/test/answer', {
+        userId,
+        questionId,
+        answer: option
+      }).catch(error => {
+        console.error('Javobni serverga yuborishda xatolik:', error);
+      });
+
+      return newAnswers;
     });
   };
 
-  const handleNextQuestion = async () => {
-    // So'nggi savol bo'lsa, serverga javoblarni yuborish
-    if (currentQuestionIndex === quizData.length - 1) {
-      await handleSubmit();
-    } else {
-      // Aks holda, keyingi savolga o'tish
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < quizData.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-
-      // Har bir savolni yuborish
-      try {
-        await axios.post('http://localhost:5000/test/answer', {
-          userId,
-          questionId: quizData[currentQuestionIndex].id,
-          userAnswer: answers[currentQuestionIndex]
-        });
-      } catch (error) {
-        console.error('Javob yuborishda xatolik:', error);
-      }
     }
   };
 
@@ -77,10 +76,10 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
   const handleSubmit = async () => {
     try {
       const response = await axios.post('http://localhost:5000/test/submit', {
-        userId,   // userIdni yuborish
+        userId,
         answers
       });
-      setResult(response.data);
+      setResult(response.data); 
       setSubmitted(true);
     } catch (error) {
       console.error('Natijani yuborishda xatolik:', error);
@@ -124,7 +123,7 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
                   id={`option-${index}`}
                   name={`question-${currentQuestionIndex}`}
                   value={option}
-                  checked={answers[currentQuestionIndex] === option}
+                  checked={answers[question.id] === option}
                   onChange={() => handleOptionChange(option)}
                   style={{ marginRight: '10px' }}
                 />
@@ -148,7 +147,7 @@ const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
             Oldingi
           </button>
           <button
-            onClick={handleNextQuestion}
+            onClick={currentQuestionIndex === quizData.length - 1 ? handleSubmit : handleNextQuestion}
             style={{
               backgroundColor: '#007bff',
               color: 'white',
