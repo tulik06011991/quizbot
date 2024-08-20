@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
+const Test = () => {  // userIdni prop sifatida qabul qilmaymiz
   const [quizData, setQuizData] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
   const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 daqiqa, sekundlarda
+
+  // userIdni localStorage'dan olish
+  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     const fetchQuizData = async () => {
