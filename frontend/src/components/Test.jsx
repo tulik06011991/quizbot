@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const Test = () => {
+const Test = ({ userId }) => {  // userId prop sifatida qabul qilinadi
   const [quizData, setQuizData] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -25,7 +25,7 @@ const Test = () => {
   useEffect(() => {
     if (timeLeft > 0 && !submitted) {
       const timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
+        setTimeLeft(timeLeft - 1);
       }, 1000);
 
       return () => clearInterval(timer);
@@ -62,6 +62,7 @@ const Test = () => {
   const handleSubmit = async () => {
     try {
       const response = await axios.post('http://localhost:5000/test/submit', {
+        userId,   // userIdni yuborish
         answers
       });
       setResult(response.data); 
@@ -90,6 +91,13 @@ const Test = () => {
 
   return (
     <div style={contentStyles}>
+      <div style={timerStyles}>
+        <div style={timerContainerStyles}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', color: timeLeft < 60 ? 'red' : 'black' }}>
+            Vaqt: {formatTime(timeLeft)}
+          </div>
+        </div>
+      </div>
       <div style={testContainerStyles}>
         <div style={{ marginBottom: '20px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
@@ -111,39 +119,32 @@ const Test = () => {
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', color: timeLeft < 60 ? 'red' : 'black', position: 'absolute', top: '10px', right: '10px' }}>
-              Vaqt: {formatTime(timeLeft)}
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={handlePreviousQuestion}
-              disabled={currentQuestionIndex === 0}
-              style={{
-                backgroundColor: '#d3d3d3',
-                padding: '10px 20px',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer'
-              }}
-            >
-              Oldingi
-            </button>
-            <button
-              onClick={currentQuestionIndex === quizData.length - 1 ? handleSubmit : handleNextQuestion}
-              style={{
-                backgroundColor: '#007bff',
-                color: 'white',
-                padding: '10px 20px',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}
-            >
-              {currentQuestionIndex === quizData.length - 1 ? 'Yakunlash' : 'Keyingi'}
-            </button>
-          </div>
+          <button
+            onClick={handlePreviousQuestion}
+            disabled={currentQuestionIndex === 0}
+            style={{
+              backgroundColor: '#d3d3d3',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Oldingi
+          </button>
+          <button
+            onClick={currentQuestionIndex === quizData.length - 1 ? handleSubmit : handleNextQuestion}
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            {currentQuestionIndex === quizData.length - 1 ? 'Yakunlash' : 'Keyingi'}
+          </button>
         </div>
       </div>
     </div>
@@ -151,9 +152,24 @@ const Test = () => {
 };
 
 const contentStyles = {
-  paddingTop: '20px', // Timerni yuqoriga joylashtirish uchun bo'sh joy qoldiramiz
+  paddingTop: '80px', // Navbarni hisobga olib, ustini bo'sh qoldiramiz
   paddingBottom: '60px', // Footer uchun pastda bo'sh joy qoldiramiz
   minHeight: '100vh',
+};
+
+const timerStyles = {
+  position: 'fixed',
+  top: '50px', // Navbardan 50px pastda joylashishi
+  right: '10px',
+  backgroundColor: '#f9f9f9',
+  padding: '10px',
+  borderRadius: '5px',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  zIndex: 1000, // Timerni eng yuqori qatlamda ko'rsatish
+};
+
+const timerContainerStyles = {
+  textAlign: 'center', // Matnni markazga qo'yish
 };
 
 const testContainerStyles = {
