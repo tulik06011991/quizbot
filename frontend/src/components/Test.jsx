@@ -11,7 +11,12 @@ const Test = () => {
   // Sahifa yuklanganda foydalanuvchi ID'sini olish
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
-    setUserId(storedUserId);
+    console.log('Stored User ID:', storedUserId); // Debugging uchun
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      console.error('LocalStorage’da foydalanuvchi ID topilmadi.');
+    }
 
     const fetchQuizData = async () => {
       try {
@@ -49,6 +54,7 @@ const Test = () => {
 
   // Testni yakunlash va natijani olish
   const handleFinishQuiz = async () => {
+    console.log('User ID during finish:', userId); // Debugging uchun
     if (!userId) {
       console.error('Foydalanuvchi ID topilmadi.');
       return;
