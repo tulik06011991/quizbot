@@ -2,3 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* components/Test.css */
+
+.test-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .loading, .no-question, .results {
+    text-align: center;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .options-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .option-item {
+    margin-bottom: 10px;
+  }
+  
+  .controls {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  
+  button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .timer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
