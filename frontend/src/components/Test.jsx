@@ -1,213 +1,87 @@
+// components/Test.jsx
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const Test = () => {
-  const [quizData, setQuizData] = useState([]);
+  const [quiz, setQuiz] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [result, setResult] = useState(null); // Yakuniy natijani ko'rsatish uchun
-  const [userId, setUserId] = useState(null); // Foydalanuvchi ID'sini saqlash uchun
-  const [token, setToken] = useState(null); // JWT tokenni saqlash uchun
-  const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 daqiqa (sekundlarda)
-  const [timerActive, setTimerActive] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(null); // Xatolik xabari uchun
+  const [selectedOptions, setSelectedOptions] = useState({});
 
-  // Component yuklanganda yoki token/ID o'zgarishida quiz ma'lumotlarini olish
   useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    const storedToken = localStorage.getItem('token');
-
-    if (storedUserId) {
-      setUserId(storedUserId);
-    } else {
-      console.error('LocalStorage’da foydalanuvchi ID topilmadi.');
-    }
-
-    if (storedToken) {
-      setToken(storedToken);
-    } else {
-      console.error('LocalStorage’da token topilmadi.');
-    }
-
-    const fetchQuizData = async () => {
+    const fetchQuiz = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/test/quiz', {
-          headers: {
-            Authorization: `Bearer ${storedToken}` // Tokenni so'rovga qo'shish
-          }
-        });
-        setQuizData(response.data);
+        const response = await axios.get('http://localhost:5000/test/quiz'); // Sizning API URL manzilingiz
+        setQuiz(response.data);
       } catch (error) {
-        console.error('Quiz ma\'lumotlarini olishda xatolik:', error);
+        console.error('Error fetching quiz:', error);
       }
     };
 
-    fetchQuizData();
+    fetchQuiz();
   }, []);
 
-  // Timer funksiyasi
-  useEffect(() => {
-    let timer;
-    if (timerActive) {
-      timer = setInterval(() => {
-        setTimeLeft(prevTime => {
-          if (prevTime <= 0) {
-            clearInterval(timer);
-            handleFinishQuiz();
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [timerActive]);
-
-  // Variant tanlash
-  const handleOptionChange = (optionId) => {
-    setAnswers({
-      ...answers,
-      [quizData[currentQuestionIndex]._id]: optionId // Savol IDsi bilan tanlangan variant IDsi
-    });
+  const handleOptionChange = (questionIndex, optionIndex) => {
+    setSelectedOptions(prevState => ({
+      ...prevState,
+      [questionIndex]: optionIndex
+    }));
   };
 
-  // Keyingi savolga o'tish
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < quizData.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    }
+  const handleNext = () => {
+    setCurrentQuestionIndex(prevIndex => Math.min(prevIndex + 1, quiz.length - 1));
   };
 
-  // Oldingi savolga o'tish
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-    }
-  };
-
-  // Testni yakunlash va natijani olish
-  const handleFinishQuiz = async () => {
-    if (!userId || !token) {
-      console.error('Foydalanuvchi ID yoki token topilmadi.');
-      return;
-    }
-
-    // Savollar va javoblarni tekshirish
-    const allAnswered = quizData.every(question => answers[question._id]);
-
-    if (!allAnswered) {
-      setErrorMessage('Hammasi savollarga javob bering.');
-      return;
-    }
-
+  const handleSubmit = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/quiz/finish', {
-        userId, // Foydalanuvchi ID
-        answers // Foydalanuvchi javoblari
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}` // Tokenni so'rovga qo'shish
-        }
-      });
-      setResult(response.data); // Natijani ko'rsatish uchun
-      setErrorMessage(null); // Xatolik xabarini tozalash
+      const answers = quiz.map((q, index) => ({
+        questionId: q._id,
+        selectedOption: selectedOptions[index]
+      }));
+
+      const response = await axios.post('/api/submit-quiz', answers); // Sizning API URL manzilingiz
+      console.log('Quiz submitted:', response.data);
     } catch (error) {
-      console.error('Natijani olishda xatolik:', error);
+      console.error('Error submitting quiz:', error);
     }
   };
 
-  if (quizData.length === 0) {
-    return <div>Yuklanmoqda...</div>;
+  if (quiz.length === 0) {
+    return <div>Loading...</div>;
   }
 
-  const question = quizData[currentQuestionIndex];
+  // Hozirgi savolni olish
+  const currentQuestion = quiz[currentQuestionIndex];
+  if (!currentQuestion) {
+    return <div>Question not found</div>;
+  }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto', height: '100vh', position: 'relative' }}>
-      <div style={{ position: 'absolute', top: '10px', right: '20px', fontSize: '18px', fontWeight: 'bold' }}>
-        <span>Qolgan vaqt: {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
-      </div>
-      <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
-        <div style={{ marginTop: '10px' }}>
-          {question.options.map((option) => (
-            <div key={option._id} style={{ marginBottom: '10px' }}>
+    <div>
+      <h2>Question {currentQuestionIndex + 1}</h2>
+      <p>{currentQuestion.question}</p>
+      <ul>
+        {currentQuestion.options && currentQuestion.options.length > 0 ? (
+          currentQuestion.options.map((option, index) => (
+            <li key={index}>
               <input
                 type="radio"
-                id={`option-${option._id}`}
-                name={`question-${question._id}`}
-                value={option._id} // Option ID
-                checked={answers[question._id] === option._id}
-                onChange={() => handleOptionChange(option._id)} // Option ID
-                style={{ marginRight: '10px' }}
+                name={`question-${currentQuestionIndex}`}
+                value={index}
+                checked={selectedOptions[currentQuestionIndex] === index}
+                onChange={() => handleOptionChange(currentQuestionIndex, index)}
               />
-              <label htmlFor={`option-${option._id}`} style={{ cursor: 'pointer' }}>
-                {option.optionText}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button
-          onClick={handlePreviousQuestion}
-          disabled={currentQuestionIndex === 0}
-          style={{
-            backgroundColor: '#d3d3d3',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer'
-          }}
-        >
-          Oldingi
-        </button>
-        {currentQuestionIndex < quizData.length - 1 ? (
-          <button
-            onClick={handleNextQuestion}
-            style={{
-              backgroundColor: '#007bff',
-              color: 'white',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            Keyingi
-          </button>
+              {option.option}
+            </li>
+          ))
         ) : (
-          <button
-            onClick={handleFinishQuiz}
-            style={{
-              backgroundColor: '#28a745',
-              color: 'white',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            Yakunlash
-          </button>
+          <li>No options available</li>
         )}
-      </div>
-
-      {/* Agar xatolik xabari mavjud bo'lsa, uni ko'rsatish */}
-      {errorMessage && (
-        <div style={{ marginTop: '20px', textAlign: 'center', color: 'red' }}>
-          <p>{errorMessage}</p>
-        </div>
-      )}
-
-      {/* Agar natija mavjud bo'lsa, uni ko'rsatish */}
-      {result && (
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <h3>Test yakunlandi!</h3>
-          <p>To'g'ri javoblar soni: {result.correctCount}/{quizData.length}</p>
-          <p>Foiz: {((result.correctCount / quizData.length) * 100).toFixed(2)}%</p>
-        </div>
-      )}
+      </ul>
+      <button onClick={handleNext} disabled={currentQuestionIndex === quiz.length - 1}>
+        Next
+      </button>
+      {currentQuestionIndex === quiz.length - 1 && <button onClick={handleSubmit}>Submit</button>}
     </div>
   );
 };
