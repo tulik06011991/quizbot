@@ -37,7 +37,7 @@ const Test = () => {
       // Tanlangan javobni serverga yuborish
       const selectedOptionId = answers[quizData[currentQuestionIndex]._id];
       try {
-        await axios.post('http://localhost:5000/test/submit-answer', {
+        await axios.post('http://localhost:5000/test/quiz', {
           questionId: quizData[currentQuestionIndex]._id,
           selectedOptionId
         });
