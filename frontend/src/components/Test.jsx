@@ -8,14 +8,11 @@ const Test = () => {
   const [result, setResult] = useState(null); // Yakuniy natijani ko'rsatish uchun
   const [userId, setUserId] = useState(null); // Foydalanuvchi ID'sini saqlash uchun
 
-  // LocalStorage'dan foydalanuvchi ID'sini olish
+  // Sahifa yuklanganda foydalanuvchi ID'sini olish
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     setUserId(storedUserId);
-  }, []);
 
-  // Savollar va variantlarni olish
-  useEffect(() => {
     const fetchQuizData = async () => {
       try {
         const response = await axios.get('http://localhost:5000/test/quiz');
@@ -60,7 +57,6 @@ const Test = () => {
     try {
       const response = await axios.post('http://localhost:5000/test/quiz/finish', {
         userId, // Foydalanuvchi ID
-        quizId: 'test-quiz-id', // Test ID (agar kerak bo'lsa, o'zgartiring)
         answers
       });
       setResult(response.data); // Natijani ko'rsatish uchun
