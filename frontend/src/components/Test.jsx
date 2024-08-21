@@ -13,8 +13,10 @@ const Test = () => {
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     const storedToken = localStorage.getItem('token');
-    console.log('Stored User ID:', storedUserId); // Debugging uchun
-    console.log('Stored Token:', storedToken); // Debugging uchun
+
+    // Debugging uchun
+    console.log('Stored User ID:', storedUserId);
+    console.log('Stored Token:', storedToken);
 
     if (storedUserId) {
       setUserId(storedUserId);
@@ -69,8 +71,9 @@ const Test = () => {
   // Testni yakunlash va natijani olish
   const handleFinishQuiz = async () => {
     console.log('User ID during finish:', userId); // Debugging uchun
-    if (!userId) {
-      console.error('Foydalanuvchi ID topilmadi.');
+
+    if (!userId || !token) {
+      console.error('Foydalanuvchi ID yoki token topilmadi.');
       return;
     }
 
