@@ -23,7 +23,7 @@ const Word = () => {
 
     try {
       // Faylni yuklash
-      await axios.post('http://localhost:5000/api//upload', formData, {
+      await axios.post('http://localhost:5000/api/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

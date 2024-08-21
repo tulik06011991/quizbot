@@ -1,154 +1,85 @@
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
 const mammoth = require('mammoth');
-const Question = require('../Model/savol'); // Model schemas
-const Option = require('../Model/variant');
+const Question = require('../Model/savol');
+const Variant = require('../Model/variant');
 const CorrectAnswer = require('../Model/togri');
+const fs = require('fs');
 
-// Multer sozlamalari
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+// Word faylidan matnni o'qish
+async function readWordFile(filePath) {
+  try {
+    const result = await mammoth.extractRawText({ path: filePath });
+    return result.value;
+  } catch (error) {
+    console.error('Error reading Word file:', error);
+    throw error;
   }
-});
+}
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only .docx files are allowed.'), false);
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter
-});
-
-// Word fayldan ma'lumot olish va JSON formatiga o'zgartirish
-const extractQuizData = async (filePath) => {
-  const data = await mammoth.extractRawText({ path: filePath });
-  const lines = data.value.split('\n').filter(Boolean);
-
-  const quizData = { questions: [] };
+// Savollarni matndan JSON formatga o'tkazish
+function parseTextToQuestions(text) {
+  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  const questions = [];
   let currentQuestion = null;
-  let questionCount = 0; // Maksimum 30 ta savol
 
-  lines.forEach((line) => {
-    if (line.match(/^\d+\./)) {
-      // Agar oldingi savol bo'lsa, uni qo'shamiz
-      if (currentQuestion && questionCount < 30) {
-        quizData.questions.push(currentQuestion);
+  lines.forEach(line => {
+    if (line.match(/^\d+\./)) { // Savol qatori
+      if (currentQuestion) {
+        questions.push(currentQuestion);
       }
-      // Yangi savol yaratish
-      if (questionCount < 30) {
-        currentQuestion = {
-          question: line.trim(),
-          options: []
-        };
-        questionCount++;
-      }
-    } 
-    else if (line.match(/^\.\s/) && currentQuestion) {
-      // Nuqta bilan boshlangan variant to'g'ri javob hisoblanadi
-      currentQuestion.options.push({
-        text: line.replace(/^\.\s/, '').trim(),
-        isCorrect: true
-      });
-    }
-    else if (line.trim() && currentQuestion) {
-      // Oddiy variantlar
-      currentQuestion.options.push({
-        text: line.trim(),
-        isCorrect: false
-      });
+      currentQuestion = {
+        text: line.replace(/^\d+\.\s*/, '').trim(),
+        variants: []
+      };
+    } else if (line.match(/^\./)) { // To'g'ri javob variant
+      currentQuestion.variants.push({ text: line.replace(/^\./, '').trim(), isCorrect: true });
+    } else { // Oddiy variant
+      currentQuestion.variants.push({ text: line.trim(), isCorrect: false });
     }
   });
 
-  // Oxirgi savolni qo'shish
-  if (currentQuestion && questionCount <= 30) {
-    quizData.questions.push(currentQuestion);
+  if (currentQuestion) {
+    questions.push(currentQuestion);
   }
 
-  return quizData;
-};
+  return questions;
+}
 
+// Quiz yaratish
+async function createQuiz(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Please select a Word file.' });
+  }
 
-// Fayl yuklash va qayta ishlash
-const uploadQuiz = async (req, res, next) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'Fayl yuklanmadi' });
-    }
+    const filePath = req.file.path; // Yuklangan faylning yo'li
+    const text = await readWordFile(filePath);
+    const questions = parseTextToQuestions(text);
 
-    const filePath = req.file.path;
-    const quizData = await extractQuizData(filePath);
+    for (let questionData of questions) {
+      // Savolni saqlash
+      const question = await Question.create({ text: questionData.text });
 
-    // MongoDB'ga savollar, variantlar va to'g'ri javoblarni saqlash
-    for (const question of quizData.questions) {
-      const savedQuestion = await Question.create({ question: question.question });
-
-      for (const option of question.options) {
-        await Option.create({
-          questionId: savedQuestion._id,
-          option: option.text,
-          isCorrect: option.isCorrect
+      for (let variantData of questionData.variants) {
+        // Variantni saqlash
+        const variant = await Variant.create({
+          text: variantData.text, // Matnni nuqta bilan boshlangan qismini olib tashlab saqlash
+          isCorrect: variantData.isCorrect, // To'g'ri yoki noto'g'ri ekanligini saqlash
+          questionId: question._id
         });
 
-        if (option.isCorrect) {
-          await CorrectAnswer.create({
-            questionId: savedQuestion._id,
-            correctOptionText: option.text // To'g'ri variant matnini saqlash
-          });
+        // Agar bu to'g'ri variant bo'lsa, CorrectAnswer schema'siga ham saqlaymiz
+        if (variantData.isCorrect) {
+          await CorrectAnswer.create({ text: variantData.text }); // To'g'ri javobni saqlash
         }
       }
     }
 
-    res.status(201).json({ message: 'Quiz muvaffaqiyatli yuklandi va saqlandi' });
+    res.status(201).json({ message: 'Quiz created successfully!' });
   } catch (error) {
-    console.error('Error in uploadQuiz:', error); // Xatolikni loglash
-    next(error);
+    res.status(500).json({ error: error.message });
   }
+}
+
+module.exports = {
+  createQuiz
 };
-
-
-
-
-// Foydalanuvchiga testni ko'rsatish
-const getQuiz = async (req, res) => {
-  try {
-    const questions = await Question.find();
-    const quiz = [];
-
-    for (const question of questions) {
-      const options = await Option.find({ questionId: question._id });
-      const correctAnswers = await CorrectAnswer.find({ questionId: question._id });
-
-      // Variantlarni formatlash
-      const formattedOptions = options.map(option => ({
-        option: option.option,
-        isCorrect: correctAnswers.some(correctAnswer => 
-          correctAnswer.correctOptionText === option.option
-        )
-      }));
-
-      quiz.push({
-        question: question.question,
-        options: formattedOptions
-      });
-    }
-
-    res.json(quiz);
-  } catch (error) {
-    res.status(500).json({ message: 'Xatolik yuz berdi' });
-  }
-};
-
-
-
-
-module.exports = { upload, uploadQuiz, getQuiz };

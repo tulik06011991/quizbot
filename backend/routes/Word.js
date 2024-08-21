@@ -1,8 +1,9 @@
+// routes/quizRoutes.js
 const express = require('express');
-const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { uploadQuiz, getQuiz } = require('../controller/Word');
+const router = express.Router();
+const quizController = require('../controller/Word');
 
 // Multer sozlamalari
 const storage = multer.diskStorage({
@@ -14,23 +15,9 @@ const storage = multer.diskStorage({
   }
 });
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only .docx files are allowed.'), false);
-  }
-};
+const upload = multer({ storage });
 
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter
-});
-
-// Quizlarni yuklash uchun route
-router.post('/upload', upload.single('file'), uploadQuiz);
-
-// Quizlarni olish uchun route
-router.get('/get', getQuiz);
+// Quiz yaratish uchun route
+router.post('/create', upload.single('file'), quizController.createQuiz);
 
 module.exports = router;
