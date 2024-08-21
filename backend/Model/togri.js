@@ -1,16 +1,8 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const correctAnswerSchema = new Schema({
-  questionId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Question',
-    required: true
-  },
-  correctOptionText: {
-    type: String,
-    required: true
-  }
+const correctAnswerSchema = new mongoose.Schema({
+  questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true },
+  correctOptionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true }
 });
 
 module.exports = mongoose.model('CorrectAnswer', correctAnswerSchema);

@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const mammoth = require('mammoth');
-const Question = require('../Model/savol');
+const Question = require('../Model/savol'); // Model schemas
 const Option = require('../Model/variant');
 const CorrectAnswer = require('../Model/togri');
 
@@ -29,42 +29,6 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-// Fayl yuklash va qayta ishlash
-const uploadQuiz = async (req, res, next) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'Fayl yuklanmadi' });
-    }
-
-    const filePath = req.file.path;
-    const quizData = await extractQuizData(filePath);
-
-    // MongoDB'ga savollar, variantlar va to'g'ri javoblarni saqlash
-    for (const question of quizData.questions) {
-      const savedQuestion = await Question.create({ question: question.question });
-
-      for (const option of question.options) {
-        const savedOption = await Option.create({
-          questionId: savedQuestion._id,
-          option: option.text
-        });
-
-        // Agar bu to'g'ri javob bo'lsa, to'g'ri javoblar jadvaliga qo'shamiz
-        if (option.isCorrect) {
-          await CorrectAnswer.create({
-            questionId: savedQuestion._id,
-            correctOptionId: savedOption._id // To'g'ri javob ID sini saqlash
-          });
-        }
-      }
-    }
-
-    res.status(201).json({ message: 'Quiz muvaffaqiyatli yuklandi va saqlandi' });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // Word fayldan ma'lumot olish va JSON formatiga o'zgartirish
 const extractQuizData = async (filePath) => {
   const data = await mammoth.extractRawText({ path: filePath });
@@ -89,14 +53,14 @@ const extractQuizData = async (filePath) => {
         questionCount++;
       }
     } 
-    else if (line.match(/^\./) && currentQuestion) {
+    else if (line.match(/^\.\s/) && currentQuestion) {
       // Nuqta bilan boshlangan variant to'g'ri javob hisoblanadi
       currentQuestion.options.push({
-        text: line.replace(/^\./, '').trim(), // Foydalanuvchiga ko'rsatishda nuqtani olib tashlaymiz
+        text: line.replace(/^\.\s/, '').trim(),
         isCorrect: true
       });
     }
-    else if (line.match(/^[A-Za-z]/) && currentQuestion) {
+    else if (line.trim() && currentQuestion) {
       // Oddiy variantlar
       currentQuestion.options.push({
         text: line.trim(),
@@ -113,6 +77,43 @@ const extractQuizData = async (filePath) => {
   return quizData;
 };
 
+// Fayl yuklash va qayta ishlash
+const uploadQuiz = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Fayl yuklanmadi' });
+    }
+
+    const filePath = req.file.path;
+    const quizData = await extractQuizData(filePath);
+
+    // MongoDB'ga savollar, variantlar va to'g'ri javoblarni saqlash
+    for (const question of quizData.questions) {
+      const savedQuestion = await Question.create({ question: question.question });
+
+      for (const option of question.options) {
+        const savedOption = await Option.create({
+          questionId: savedQuestion._id,
+          option: option.text,
+          isCorrect: option.isCorrect
+        });
+
+        if (option.isCorrect) {
+          await CorrectAnswer.create({
+            questionId: savedQuestion._id,
+            correctOptionId: savedOption._id
+          });
+        }
+      }
+    }
+
+    res.status(201).json({ message: 'Quiz muvaffaqiyatli yuklandi va saqlandi' });
+  } catch (error) {
+    console.error('Error in uploadQuiz:', error); // Xatolikni loglash
+    next(error);
+  }
+};
+
 // Foydalanuvchiga testni ko'rsatish
 const getQuiz = async (req, res) => {
   try {
@@ -121,7 +122,11 @@ const getQuiz = async (req, res) => {
 
     for (const question of questions) {
       const options = await Option.find({ questionId: question._id });
-      const formattedOptions = options.map(option => option.option); // To'g'ri javoblarni yashirish
+      const correctAnswers = await CorrectAnswer.find({ questionId: question._id });
+      const formattedOptions = options.map(option => ({
+        option: option.option,
+        isCorrect: correctAnswers.some(correctAnswer => correctAnswer.correctOptionId.equals(option._id))
+      }));
 
       quiz.push({
         question: question.question,

@@ -10,6 +10,7 @@ const Test = () => {
   const [token, setToken] = useState(null); // JWT tokenni saqlash uchun
   const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 daqiqa (sekundlarda)
   const [timerActive, setTimerActive] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null); // Xatolik xabari uchun
 
   // Component yuklanganda yoki token/ID o'zgarishida quiz ma'lumotlarini olish
   useEffect(() => {
@@ -63,10 +64,10 @@ const Test = () => {
   }, [timerActive]);
 
   // Variant tanlash
-  const handleOptionChange = (optionText) => {
+  const handleOptionChange = (optionId) => {
     setAnswers({
       ...answers,
-      [quizData[currentQuestionIndex]._id]: optionText
+      [quizData[currentQuestionIndex]._id]: optionId // Savol IDsi bilan tanlangan variant IDsi
     });
   };
 
@@ -91,6 +92,14 @@ const Test = () => {
       return;
     }
 
+    // Savollar va javoblarni tekshirish
+    const allAnswered = quizData.every(question => answers[question._id]);
+
+    if (!allAnswered) {
+      setErrorMessage('Hammasi savollarga javob bering.');
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:5000/api/quiz/finish', {
         userId, // Foydalanuvchi ID
@@ -101,6 +110,7 @@ const Test = () => {
         }
       });
       setResult(response.data); // Natijani ko'rsatish uchun
+      setErrorMessage(null); // Xatolik xabarini tozalash
     } catch (error) {
       console.error('Natijani olishda xatolik:', error);
     }
@@ -125,10 +135,10 @@ const Test = () => {
               <input
                 type="radio"
                 id={`option-${option._id}`}
-                name={`question-${currentQuestionIndex}`}
-                value={option.optionText} // Option ID emas, optionText
-                checked={answers[question._id] === option.optionText}
-                onChange={() => handleOptionChange(option.optionText)} // Option ID emas, optionText
+                name={`question-${question._id}`}
+                value={option._id} // Option ID
+                checked={answers[question._id] === option._id}
+                onChange={() => handleOptionChange(option._id)} // Option ID
                 style={{ marginRight: '10px' }}
               />
               <label htmlFor={`option-${option._id}`} style={{ cursor: 'pointer' }}>
@@ -182,6 +192,13 @@ const Test = () => {
           </button>
         )}
       </div>
+
+      {/* Agar xatolik xabari mavjud bo'lsa, uni ko'rsatish */}
+      {errorMessage && (
+        <div style={{ marginTop: '20px', textAlign: 'center', color: 'red' }}>
+          <p>{errorMessage}</p>
+        </div>
+      )}
 
       {/* Agar natija mavjud bo'lsa, uni ko'rsatish */}
       {result && (

@@ -1,16 +1,9 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const optionSchema = new Schema({
-  questionId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Question',
-    required: true
-  },
-  option: {
-    type: String,
-    required: true
-  }
+const optionSchema = new mongoose.Schema({
+  questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true },
+  option: { type: String, required: true },
+  isCorrect: { type: Boolean, required: true }
 });
 
 module.exports = mongoose.model('Option', optionSchema);
