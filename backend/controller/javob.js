@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const CorrectAnswer = require('../Model/togri'); // Natijalar model
+const CorrectAnswer = require('../Model/togri'); // To'g'ri javoblar model
 const User = require('../Model/ModelSchema'); // User modeli
 
 // Test yakunlash va natijani hisoblash
