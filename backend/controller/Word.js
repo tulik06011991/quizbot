@@ -53,7 +53,7 @@ const uploadQuiz = async (req, res, next) => {
         if (option.isCorrect) {
           await CorrectAnswer.create({
             questionId: savedQuestion._id,
-            correctOptionId: savedOption._id  // To'g'ri javob ID sini saqlash
+            correctOptionId: savedOption._id // To'g'ri javob ID sini saqlash
           });
         }
       }
