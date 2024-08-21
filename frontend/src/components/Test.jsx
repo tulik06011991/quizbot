@@ -8,8 +8,9 @@ const Test = () => {
   const [result, setResult] = useState(null); // Yakuniy natijani ko'rsatish uchun
   const [userId, setUserId] = useState(null); // Foydalanuvchi ID'sini saqlash uchun
   const [token, setToken] = useState(null); // JWT tokenni saqlash uchun
+  const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 daqiqa (sekundlarda)
+  const [timerActive, setTimerActive] = useState(true);
 
-  // Sahifa yuklanganda foydalanuvchi ID'sini va tokenni olish
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     const storedToken = localStorage.getItem('token');
@@ -45,6 +46,23 @@ const Test = () => {
 
     fetchQuizData();
   }, []);
+
+  useEffect(() => {
+    let timer;
+    if (timerActive) {
+      timer = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 0) {
+            clearInterval(timer);
+            handleFinishQuiz();
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [timerActive]);
 
   // Variant tanlash
   const handleOptionChange = (optionId) => {
@@ -99,7 +117,10 @@ const Test = () => {
   const question = quizData[currentQuestionIndex];
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto', height: '100vh' }}>
+    <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto', height: '100vh', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: '10px', right: '20px', fontSize: '18px', fontWeight: 'bold' }}>
+        <span>Qolgan vaqt: {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
+      </div>
       <div style={{ marginBottom: '20px' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
         <div style={{ marginTop: '10px' }}>
