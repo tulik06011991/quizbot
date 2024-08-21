@@ -2,8 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const mammoth = require('mammoth');
-const Question = require('../Model/savol');
-const Option = require('../Model/variant');
+const Question = require('../Model/Question');
+const Option = require('../Model/Option');
+const CorrectAnswer = require('../Model/CorrectAnswer');
 
 // Multer sozlamalari
 const storage = multer.diskStorage({
@@ -38,16 +39,23 @@ const uploadQuiz = async (req, res, next) => {
     const filePath = req.file.path;
     const quizData = await extractQuizData(filePath);
 
-    // MongoDB'ga savollar va variantlarni saqlash
+    // MongoDB'ga savollar, variantlar va to'g'ri javoblarni saqlash
     for (const question of quizData.questions) {
       const savedQuestion = await Question.create({ question: question.question });
 
       for (const option of question.options) {
-        await Option.create({
-          questionId: savedQuestion._id, // Savol ID sini variantga bog'lash
-          option: option.text,           // Variant matni
-          isCorrect: option.isCorrect    // To'g'ri yoki noto'g'ri variant
+        const savedOption = await Option.create({
+          questionId: savedQuestion._id,
+          option: option.text
         });
+
+        // Agar bu to'g'ri javob bo'lsa, to'g'ri javoblar jadvaliga qo'shamiz
+        if (option.isCorrect) {
+          await CorrectAnswer.create({
+            questionId: savedQuestion._id,
+            correctOptionId: savedOption._id  // To'g'ri javob ID sini saqlash
+          });
+        }
       }
     }
 
@@ -81,12 +89,18 @@ const extractQuizData = async (filePath) => {
         questionCount++;
       }
     } 
-    else if (line.match(/^[A-D]\./) && currentQuestion) {
-      // Katta harf bilan boshlangan variant to'g'ri javob deb belgilanadi
-      const isCorrect = /[A-D]\.[A-Z]/.test(line);
+    else if (line.match(/^\./) && currentQuestion) {
+      // Nuqta bilan boshlangan variant to'g'ri javob hisoblanadi
+      currentQuestion.options.push({
+        text: line.replace(/^\./, '').trim(), // Foydalanuvchiga ko'rsatishda nuqtani olib tashlaymiz
+        isCorrect: true
+      });
+    }
+    else if (line.match(/^[A-Za-z]/) && currentQuestion) {
+      // Oddiy variantlar
       currentQuestion.options.push({
         text: line.trim(),
-        isCorrect: isCorrect
+        isCorrect: false
       });
     }
   });
@@ -99,11 +113,23 @@ const extractQuizData = async (filePath) => {
   return quizData;
 };
 
-// Savollarni va ularning variantlarini olib kelish uchun API
+// Foydalanuvchiga testni ko'rsatish
 const getQuiz = async (req, res) => {
   try {
-    const questions = await Question.find().populate('options');
-    res.json(questions);
+    const questions = await Question.find();
+    const quiz = [];
+
+    for (const question of questions) {
+      const options = await Option.find({ questionId: question._id });
+      const formattedOptions = options.map(option => option.option); // To'g'ri javoblarni yashirish
+
+      quiz.push({
+        question: question.question,
+        options: formattedOptions
+      });
+    }
+
+    res.json(quiz);
   } catch (error) {
     res.status(500).json({ message: 'Xatolik yuz berdi' });
   }
