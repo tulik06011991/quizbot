@@ -5,6 +5,7 @@ const Test = () => {
   const [quizData, setQuizData] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 daqiqa
 
   useEffect(() => {
     // Savollar va variantlarni olish
@@ -18,6 +19,21 @@ const Test = () => {
     };
 
     fetchQuizData();
+
+    // Timerni ishga tushirish
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 0) {
+          clearInterval(timer);
+          // Vaqt tugagandan so'ng natijalarni ko'rsatish
+          showResults();
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer); // Komponentdan chiqishda taymerni to'xtatish
   }, []);
 
   const handleOptionChange = (option) => {
@@ -39,6 +55,17 @@ const Test = () => {
     }
   };
 
+  const showResults = () => {
+    // Natijalarni ko'rsatish uchun kerakli amallar
+    console.log('Test tugadi, natijalarni ko\'rsating');
+  };
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   if (quizData.length === 0) {
     return <div>Yuklanmoqda...</div>;
   }
@@ -47,6 +74,25 @@ const Test = () => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto' }}>
+      <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+        {/* Timer */}
+        <div
+          style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            color: timeLeft <= 60 ? 'red' : 'black',
+            padding: '10px',
+            borderRadius: '5px',
+            backgroundColor: '#f0f0f0',
+            display: 'inline-block',
+            textAlign: 'center',
+            width: '120px',
+          }}
+        >
+          {formatTime(timeLeft)}
+        </div>
+      </div>
+
       <div style={{ marginBottom: '20px' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
         <div style={{ marginTop: '10px' }}>
