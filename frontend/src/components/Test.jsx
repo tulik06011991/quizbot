@@ -7,20 +7,34 @@ const Test = () => {
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null); // Yakuniy natijani ko'rsatish uchun
   const [userId, setUserId] = useState(null); // Foydalanuvchi ID'sini saqlash uchun
+  const [token, setToken] = useState(null); // JWT tokenni saqlash uchun
 
-  // Sahifa yuklanganda foydalanuvchi ID'sini olish
+  // Sahifa yuklanganda foydalanuvchi ID'sini va tokenni olish
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
+    const storedToken = localStorage.getItem('token');
     console.log('Stored User ID:', storedUserId); // Debugging uchun
+    console.log('Stored Token:', storedToken); // Debugging uchun
+
     if (storedUserId) {
       setUserId(storedUserId);
     } else {
       console.error('LocalStorage’da foydalanuvchi ID topilmadi.');
     }
 
+    if (storedToken) {
+      setToken(storedToken);
+    } else {
+      console.error('LocalStorage’da token topilmadi.');
+    }
+
     const fetchQuizData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/test/quiz');
+        const response = await axios.get('http://localhost:5000/test/quiz', {
+          headers: {
+            Authorization: `Bearer ${storedToken}` // Tokenni so'rovga qo'shish
+          }
+        });
         setQuizData(response.data);
       } catch (error) {
         console.error('Quiz ma\'lumotlarini olishda xatolik:', error);
@@ -64,6 +78,10 @@ const Test = () => {
       const response = await axios.post('http://localhost:5000/test/quiz/finish', {
         userId, // Foydalanuvchi ID
         answers
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}` // Tokenni so'rovga qo'shish
+        }
       });
       setResult(response.data); // Natijani ko'rsatish uchun
     } catch (error) {
