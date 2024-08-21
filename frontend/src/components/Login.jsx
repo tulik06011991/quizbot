@@ -18,6 +18,9 @@ const Login = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
+      // Foydalanuvchi ID'ni alohida saqlash
+      localStorage.setItem('userId', response.data.user.id);
+
       // Login bo'lgandan keyin foydalanuvchini boshqa sahifaga yo'naltirish
       window.location.href = '/menu';
     } catch (error) {

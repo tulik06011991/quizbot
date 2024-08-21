@@ -80,7 +80,7 @@ const Test = () => {
     try {
       const response = await axios.post('http://localhost:5000/test/quiz/finish', {
         userId, // Foydalanuvchi ID
-        answers
+        answers // Foydalanuvchi javoblari
       }, {
         headers: {
           Authorization: `Bearer ${token}` // Tokenni so'rovga qo'shish

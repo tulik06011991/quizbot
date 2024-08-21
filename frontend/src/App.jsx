@@ -9,12 +9,12 @@ import NotFound from './components/NotFound';
 import Test from './components/Test';
 import Word from './components/Word';
 import Fanlar from './components/Fanlar';
-import FanlarOquvchi from './components/FanlarOquchi';
-import Menu from './components/Menu'; // Menu komponentini qo'shdik
+import FanlarOquvchi from './components/FanlarOquchi'
+import Menu from './components/Menu';
 
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem('token'); // Tokenni olish
-  return token ? children : <Navigate to="/" replace />; // Token bo'lmasa login sahifasiga yo'naltirish
+  const token = localStorage.getItem('token'); 
+  return token ? children : <Navigate to="/" replace />; 
 };
 
 const App = () => {
@@ -28,7 +28,6 @@ const App = () => {
       // Masalan, foydalanuvchi ma'lumotlarini olish uchun so'rov
       axios.get(`http://localhost:5000/auth/login/${storedUserId}`)
         .then(response => {
-          // Foydalanuvchi ma'lumotlarini saqlash (agar kerak bo'lsa)
           console.log('User data:', response.data);
         })
         .catch(error => {
@@ -85,7 +84,7 @@ const App = () => {
             </PrivateRoute>
           }
         />
-        <Route path="*" element={<NotFound />} /> {/* 404 sahifasini qo'shish */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
     </Router>
