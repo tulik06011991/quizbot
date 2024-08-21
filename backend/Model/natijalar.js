@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 const resultSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: 'User', // Agar sizda User modeli bo'lsa
+    ref: 'User', // User modeliga referens
     required: true
   },
   quizId: {
     type: Schema.Types.ObjectId,
-    ref: 'Quiz', // Agar sizda Quiz modeli bo'lsa
+    ref: 'Quiz', // Quiz modeliga referens
     required: true
   },
   correctCount: {

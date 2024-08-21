@@ -78,7 +78,7 @@ const Test = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/test/quiz/finish', {
+      const response = await axios.post('http://localhost:5000/api/quiz/finish', {
         userId, // Foydalanuvchi ID
         answers // Foydalanuvchi javoblari
       }, {

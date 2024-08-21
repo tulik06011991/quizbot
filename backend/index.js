@@ -30,7 +30,7 @@ app.use('/api', fileUploadRoutes);
 app.use(errorHandler);
 app.use('/test', Test)
 app.use('/auth', Auth)
-app.use('/', javob)
+app.use('/api', javob)
 
 // Serverni ishga tushirish
 app.listen(5000, () => {

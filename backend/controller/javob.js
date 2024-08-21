@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const CorrectAnswer = require('../Model/togri'); // To'g'ri javoblar model
+const CorrectAnswer = require('../Model/togri'); // To'g'ri javoblar modeli
 const User = require('../Model/ModelSchema'); // User modeli
 
 // Test yakunlash va natijani hisoblash
@@ -18,10 +18,14 @@ const finishQuiz = async (req, res) => {
 
     // Har bir savol uchun to'g'ri javobni tekshirish
     for (const [questionId, selectedOptionId] of Object.entries(answers)) {
+      // Savolga mos to'g'ri javobni olish
       const correctAnswer = await CorrectAnswer.findOne({ questionId }).populate('correctOptionId');
 
-      if (correctAnswer && correctAnswer.correctOptionId._id.toString() === selectedOptionId) {
+      // Tekshirish: correctAnswer mavjudmi va correctOptionId mavjudmi
+      if (correctAnswer && correctAnswer.correctOptionId && correctAnswer.correctOptionId._id.toString() === selectedOptionId) {
         correctCount++;
+      } else {
+        console.warn(`Savol ${questionId} uchun to'g'ri javob topilmadi yoki noto'g'ri formatda.`);
       }
     }
 
