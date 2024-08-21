@@ -1,11 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const {  finishQuiz } = require('../controller/Test'); // Controller funksiyalarni import qilish
+const { finishQuiz } = require('../controller/javob');
 
-// Quiz olish route (GET /quiz)
-
-
-// Quizni yakunlash route (POST /quiz/finish)
+// Testni yakunlash va natijani hisoblash uchun route
 router.post('/quiz/finish', finishQuiz);
 
 module.exports = router;

@@ -6,6 +6,13 @@ const Test = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null); // Yakuniy natijani ko'rsatish uchun
+  const [userId, setUserId] = useState(null); // Foydalanuvchi ID'sini saqlash uchun
+
+  // LocalStorage'dan foydalanuvchi ID'sini olish
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    setUserId(storedUserId);
+  }, []);
 
   // Savollar va variantlarni olish
   useEffect(() => {
@@ -30,27 +37,30 @@ const Test = () => {
   };
 
   // Keyingi savolga o'tish
-  const handleNextQuestion = async () => {
+  const handleNextQuestion = () => {
     if (currentQuestionIndex < quizData.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
 
-      // Tanlangan javobni serverga yuborish
-      const selectedOptionId = answers[quizData[currentQuestionIndex]._id];
-      try {
-        await axios.post('http://localhost:5000/test/quiz', {
-          questionId: quizData[currentQuestionIndex]._id,
-          selectedOptionId
-        });
-      } catch (error) {
-        console.error('Javobni yuborishda xatolik:', error);
-      }
+  // Oldingi savolga o'tish
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
 
   // Testni yakunlash va natijani olish
   const handleFinishQuiz = async () => {
+    if (!userId) {
+      console.error('Foydalanuvchi ID topilmadi.');
+      return;
+    }
+
     try {
-      const response = await axios.post('http://localhost:5000/test/finish-quiz', {
+      const response = await axios.post('http://localhost:5000/test/quiz/finish', {
+        userId, // Foydalanuvchi ID
+        quizId: 'test-quiz-id', // Test ID (agar kerak bo'lsa, o'zgartiring)
         answers
       });
       setResult(response.data); // Natijani ko'rsatish uchun
@@ -90,7 +100,7 @@ const Test = () => {
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button
-          onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
+          onClick={handlePreviousQuestion}
           disabled={currentQuestionIndex === 0}
           style={{
             backgroundColor: '#d3d3d3',
