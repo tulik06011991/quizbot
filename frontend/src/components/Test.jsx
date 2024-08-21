@@ -5,10 +5,10 @@ const Test = () => {
   const [quizData, setQuizData] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 daqiqa
+  const [result, setResult] = useState(null); // Yakuniy natijani ko'rsatish uchun
 
+  // Savollar va variantlarni olish
   useEffect(() => {
-    // Savollar va variantlarni olish
     const fetchQuizData = async () => {
       try {
         const response = await axios.get('http://localhost:5000/test/quiz');
@@ -19,51 +19,44 @@ const Test = () => {
     };
 
     fetchQuizData();
-
-    // Timerni ishga tushirish
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 0) {
-          clearInterval(timer);
-          // Vaqt tugagandan so'ng natijalarni ko'rsatish
-          showResults();
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer); // Komponentdan chiqishda taymerni to'xtatish
   }, []);
 
-  const handleOptionChange = (option) => {
+  // Variant tanlash
+  const handleOptionChange = (optionId) => {
     setAnswers({
       ...answers,
-      [currentQuestionIndex]: option
+      [quizData[currentQuestionIndex]._id]: optionId
     });
   };
 
-  const handleNextQuestion = () => {
+  // Keyingi savolga o'tish
+  const handleNextQuestion = async () => {
     if (currentQuestionIndex < quizData.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+
+      // Tanlangan javobni serverga yuborish
+      const selectedOptionId = answers[quizData[currentQuestionIndex]._id];
+      try {
+        await axios.post('http://localhost:5000/test/submit-answer', {
+          questionId: quizData[currentQuestionIndex]._id,
+          selectedOptionId
+        });
+      } catch (error) {
+        console.error('Javobni yuborishda xatolik:', error);
+      }
     }
   };
 
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+  // Testni yakunlash va natijani olish
+  const handleFinishQuiz = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/test/finish-quiz', {
+        answers
+      });
+      setResult(response.data); // Natijani ko'rsatish uchun
+    } catch (error) {
+      console.error('Natijani olishda xatolik:', error);
     }
-  };
-
-  const showResults = () => {
-    // Natijalarni ko'rsatish uchun kerakli amallar
-    console.log('Test tugadi, natijalarni ko\'rsating');
-  };
-
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   if (quizData.length === 0) {
@@ -73,48 +66,31 @@ const Test = () => {
   const question = quizData[currentQuestionIndex];
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto' }}>
-      <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-        {/* Timer */}
-        <div
-          style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            color: timeLeft <= 60 ? 'red' : 'black',
-            padding: '10px',
-            borderRadius: '5px',
-            backgroundColor: '#f0f0f0',
-            display: 'inline-block',
-            textAlign: 'center',
-            width: '120px',
-          }}
-        >
-          {formatTime(timeLeft)}
-        </div>
-      </div>
-
+    <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto', height: '100vh' }}>
       <div style={{ marginBottom: '20px' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{question.question}</h2>
         <div style={{ marginTop: '10px' }}>
-          {question.options.map((option, index) => (
-            <div key={index} style={{ marginBottom: '10px' }}>
+          {question.options.map((option) => (
+            <div key={option._id} style={{ marginBottom: '10px' }}>
               <input
                 type="radio"
-                id={`option-${index}`}
+                id={`option-${option._id}`}
                 name={`question-${currentQuestionIndex}`}
-                value={option}
-                checked={answers[currentQuestionIndex] === option}
-                onChange={() => handleOptionChange(option)}
+                value={option._id}
+                checked={answers[question._id] === option._id}
+                onChange={() => handleOptionChange(option._id)}
                 style={{ marginRight: '10px' }}
               />
-              <label htmlFor={`option-${index}`} style={{ cursor: 'pointer' }}>{option}</label>
+              <label htmlFor={`option-${option._id}`} style={{ cursor: 'pointer' }}>
+                {option.option}
+              </label>
             </div>
           ))}
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button
-          onClick={handlePreviousQuestion}
+          onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
           disabled={currentQuestionIndex === 0}
           style={{
             backgroundColor: '#d3d3d3',
@@ -126,21 +102,45 @@ const Test = () => {
         >
           Oldingi
         </button>
-        <button
-          onClick={handleNextQuestion}
-          disabled={currentQuestionIndex === quizData.length - 1}
-          style={{
-            backgroundColor: '#007bff',
-            color: 'white',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: currentQuestionIndex === quizData.length - 1 ? 'not-allowed' : 'pointer'
-          }}
-        >
-          Keyingi
-        </button>
+        {currentQuestionIndex < quizData.length - 1 ? (
+          <button
+            onClick={handleNextQuestion}
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Keyingi
+          </button>
+        ) : (
+          <button
+            onClick={handleFinishQuiz}
+            style={{
+              backgroundColor: '#28a745',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Yakunlash
+          </button>
+        )}
       </div>
+
+      {/* Agar natija mavjud bo'lsa, uni ko'rsatish */}
+      {result && (
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <h3>Test yakunlandi!</h3>
+          <p>To'g'ri javoblar soni: {result.correctCount}/{quizData.length}</p>
+          <p>Foiz: {((result.correctCount / quizData.length) * 100).toFixed(2)}%</p>
+        </div>
+      )}
     </div>
   );
 };

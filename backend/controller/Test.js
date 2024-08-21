@@ -1,25 +1,56 @@
-const Question = require('../Model/savol');
-const Option = require('../Model/variant');
+const Question = require('../Model/Question');
+const Option = require('../Model/Option');
+const CorrectAnswer = require('../Model/CorrectAnswer');
 
-const getQuiz = async (req, res, next) => {
+// Savollar va variantlarni qaytaruvchi funksiya
+const getQuiz = async (req, res) => {
   try {
-    const questions = await Question.find();
-    const options = await Option.find().populate('questionId');
+    const questions = await Question.find(); // Barcha savollarni olish
+    const quiz = [];
 
-    // Savollar va variantlarni birlashtirish
-    const quizData = questions.map(question => {
-      return {
+    for (const question of questions) {
+      // Har bir savol uchun tegishli variantlarni olish
+      const options = await Option.find({ questionId: question._id });
+      const formattedOptions = options.map(option => ({
+        _id: option._id,
+        option: option.option // yoki text bo'lsa text, option ni ishlatamiz
+      }));
+
+      // Savolni variantlar bilan birgalikda quiz array'iga qo'shish
+      quiz.push({
+        _id: question._id, // Savol ID'sini qo'shish
         question: question.question,
-        options: options
-          .filter(option => option.questionId._id.toString() === question._id.toString())
-          .map(option => option.option)
-      };
-    });
+        options: formattedOptions
+      });
+    }
 
-    res.status(200).json(quizData);
+    res.json(quiz); // JSON formatda qaytarish
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: 'Xatolik yuz berdi' });
   }
 };
 
-module.exports = { getQuiz };
+// Foydalanuvchi javoblarini to'g'ri javoblar bilan solishtirish va natijani qaytaruvchi funksiya
+const finishQuiz = async (req, res) => {
+  const { answers } = req.body;
+  let correctCount = 0;
+
+  try {
+    for (const [questionId, selectedOptionId] of Object.entries(answers)) {
+      // Har bir savol uchun to'g'ri javobni olish
+      const correctAnswer = await CorrectAnswer.findOne({ questionId });
+
+      // Agar foydalanuvchi tanlagan javob to'g'ri bo'lsa, correctCount ni oshirish
+      if (correctAnswer && correctAnswer.correctOptionId.toString() === selectedOptionId) {
+        correctCount++;
+      }
+    }
+
+    // To'g'ri javoblar sonini qaytarish
+    res.json({ correctCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Xatolik yuz berdi' });
+  }
+};
+
+module.exports = { getQuiz, finishQuiz };

@@ -2,9 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const mammoth = require('mammoth');
-const Question = require('../Model/Question');
-const Option = require('../Model/Option');
-const CorrectAnswer = require('../Model/CorrectAnswer');
+const Question = require('../Model/savol');
+const Option = require('../Model/variant');
+const CorrectAnswer = require('../Model/togri');
 
 // Multer sozlamalari
 const storage = multer.diskStorage({
