@@ -1,6 +1,6 @@
-const Question = require('../Model/Question');
-const Option = require('../Model/Option');
-const CorrectAnswer = require('../Model/CorrectAnswer');
+const Question = require('../Model/savol');
+const Option = require('../Model/variant');
+const CorrectAnswer = require('../Model/togri');
 
 // Savollar va variantlarni qaytaruvchi funksiya
 const getQuiz = async (req, res) => {
