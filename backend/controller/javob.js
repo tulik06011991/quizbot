@@ -17,12 +17,12 @@ const finishQuiz = async (req, res) => {
     }
 
     // Har bir savol uchun to'g'ri javobni tekshirish
-    for (const [questionId, selectedOptionId] of Object.entries(answers)) {
+    for (const [questionId, selectedOptionText] of Object.entries(answers)) {
       // Savolga mos to'g'ri javobni olish
-      const correctAnswer = await CorrectAnswer.findOne({ questionId }).populate('correctOptionId');
+      const correctAnswer = await CorrectAnswer.findOne({ questionId });
 
-      // Tekshirish: correctAnswer mavjudmi va correctOptionId mavjudmi
-      if (correctAnswer && correctAnswer.correctOptionId && correctAnswer.correctOptionId._id.toString() === selectedOptionId) {
+      // Tekshirish: correctAnswer mavjudmi va correctOptionText mavjudmi
+      if (correctAnswer && correctAnswer.correctOptionText === selectedOptionText) {
         correctCount++;
       } else {
         console.warn(`Savol ${questionId} uchun to'g'ri javob topilmadi yoki noto'g'ri formatda.`);

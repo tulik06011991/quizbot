@@ -13,14 +13,14 @@ const getQuiz = async (req, res) => {
       const options = await Option.find({ questionId: question._id });
       const formattedOptions = options.map(option => ({
         _id: option._id,
-        option: option.option // yoki text bo'lsa text, option ni ishlatamiz
+        optionText: option.option // yoki text bo'lsa text, optionText ni ishlatamiz
       }));
 
       // Savolni variantlar bilan birgalikda quiz array'iga qo'shish
       quiz.push({
         _id: question._id, // Savol ID'sini qo'shish
         question: question.question,
-        options: formattedOptions
+        options: formattedOptions // Variantlarni qo'shish
       });
     }
 
@@ -32,7 +32,7 @@ const getQuiz = async (req, res) => {
 
 // Foydalanuvchi javoblarini to'g'ri javoblar bilan solishtirish va natijani qaytaruvchi funksiya
 const finishQuiz = async (req, res) => {
-  const { answers } = req.body;
+  const { userId, answers } = req.body; // userId ham olishni qo'shdik
   let correctCount = 0;
 
   try {

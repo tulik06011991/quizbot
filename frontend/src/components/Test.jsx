@@ -11,13 +11,10 @@ const Test = () => {
   const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 daqiqa (sekundlarda)
   const [timerActive, setTimerActive] = useState(true);
 
+  // Component yuklanganda yoki token/ID o'zgarishida quiz ma'lumotlarini olish
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     const storedToken = localStorage.getItem('token');
-
-    // Debugging uchun
-    console.log('Stored User ID:', storedUserId);
-    console.log('Stored Token:', storedToken);
 
     if (storedUserId) {
       setUserId(storedUserId);
@@ -47,6 +44,7 @@ const Test = () => {
     fetchQuizData();
   }, []);
 
+  // Timer funksiyasi
   useEffect(() => {
     let timer;
     if (timerActive) {
@@ -65,10 +63,10 @@ const Test = () => {
   }, [timerActive]);
 
   // Variant tanlash
-  const handleOptionChange = (optionId) => {
+  const handleOptionChange = (optionText) => {
     setAnswers({
       ...answers,
-      [quizData[currentQuestionIndex]._id]: optionId
+      [quizData[currentQuestionIndex]._id]: optionText
     });
   };
 
@@ -88,8 +86,6 @@ const Test = () => {
 
   // Testni yakunlash va natijani olish
   const handleFinishQuiz = async () => {
-    console.log('User ID during finish:', userId); // Debugging uchun
-
     if (!userId || !token) {
       console.error('Foydalanuvchi ID yoki token topilmadi.');
       return;
@@ -130,13 +126,13 @@ const Test = () => {
                 type="radio"
                 id={`option-${option._id}`}
                 name={`question-${currentQuestionIndex}`}
-                value={option._id}
-                checked={answers[question._id] === option._id}
-                onChange={() => handleOptionChange(option._id)}
+                value={option.optionText} // Option ID emas, optionText
+                checked={answers[question._id] === option.optionText}
+                onChange={() => handleOptionChange(option.optionText)} // Option ID emas, optionText
                 style={{ marginRight: '10px' }}
               />
               <label htmlFor={`option-${option._id}`} style={{ cursor: 'pointer' }}>
-                {option.option}
+                {option.optionText}
               </label>
             </div>
           ))}
