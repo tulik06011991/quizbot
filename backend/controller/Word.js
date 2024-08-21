@@ -77,6 +77,7 @@ const extractQuizData = async (filePath) => {
   return quizData;
 };
 
+
 // Fayl yuklash va qayta ishlash
 const uploadQuiz = async (req, res, next) => {
   try {
@@ -92,7 +93,7 @@ const uploadQuiz = async (req, res, next) => {
       const savedQuestion = await Question.create({ question: question.question });
 
       for (const option of question.options) {
-        const savedOption = await Option.create({
+        await Option.create({
           questionId: savedQuestion._id,
           option: option.text,
           isCorrect: option.isCorrect
@@ -101,7 +102,7 @@ const uploadQuiz = async (req, res, next) => {
         if (option.isCorrect) {
           await CorrectAnswer.create({
             questionId: savedQuestion._id,
-            correctOptionId: savedOption._id
+            correctOptionText: option.text // To'g'ri variant matnini saqlash
           });
         }
       }
@@ -114,6 +115,9 @@ const uploadQuiz = async (req, res, next) => {
   }
 };
 
+
+
+
 // Foydalanuvchiga testni ko'rsatish
 const getQuiz = async (req, res) => {
   try {
@@ -123,9 +127,13 @@ const getQuiz = async (req, res) => {
     for (const question of questions) {
       const options = await Option.find({ questionId: question._id });
       const correctAnswers = await CorrectAnswer.find({ questionId: question._id });
+
+      // Variantlarni formatlash
       const formattedOptions = options.map(option => ({
         option: option.option,
-        isCorrect: correctAnswers.some(correctAnswer => correctAnswer.correctOptionId.equals(option._id))
+        isCorrect: correctAnswers.some(correctAnswer => 
+          correctAnswer.correctOptionText === option.option
+        )
       }));
 
       quiz.push({
@@ -139,5 +147,8 @@ const getQuiz = async (req, res) => {
     res.status(500).json({ message: 'Xatolik yuz berdi' });
   }
 };
+
+
+
 
 module.exports = { upload, uploadQuiz, getQuiz };

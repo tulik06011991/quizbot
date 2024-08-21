@@ -7,11 +7,12 @@ const Test = () => {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [timer, setTimer] = useState(45 * 60); // 45 daqiqa timer
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [results, setResults] = useState(null);
 
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/test/quiz'); // Sizning API URL manzilingiz
+        const response = await axios.get('http://localhost:5000/test/quiz');
         setQuiz(response.data);
       } catch (error) {
         console.error('Error fetching quiz:', error);
@@ -20,19 +21,18 @@ const Test = () => {
 
     fetchQuiz();
 
-    // Timer sozlash
     const interval = setInterval(() => {
       setTimer(prevTimer => {
         if (prevTimer <= 0) {
           clearInterval(interval);
-          handleSubmit(); // Timer tugagandan so'ng submit qilish
+          handleSubmit();
           return 0;
         }
         return prevTimer - 1;
       });
     }, 1000);
 
-    return () => clearInterval(interval); // Component unmount bo'lganda intervalni to'xtatish
+    return () => clearInterval(interval);
   }, []);
 
   const handleOptionChange = (questionIndex, optionIndex) => {
@@ -48,24 +48,34 @@ const Test = () => {
 
   const handleSubmit = async () => {
     try {
+      const userId = localStorage.getItem('userId'); // `localStorage` dan `userId` ni olish
+      if (!userId) {
+        console.error('User ID not found in localStorage');
+        return;
+      }
+  
       const answers = quiz.map((q, index) => ({
         questionId: q._id,
-        selectedOption: selectedOptions[index]
+        selectedOptionId: String(selectedOptions[index]) // Convert to string if needed
       }));
-
-      const response = await axios.post('/api/submit-quiz', answers); // Sizning API URL manzilingiz
-      console.log('Quiz submitted:', response.data);
+  
+      const response = await axios.post('http://localhost:5000/api/check-answers', {
+        userId,
+        answers
+      });
+  
+      setResults(response.data);
       setIsSubmitted(true);
     } catch (error) {
       console.error('Error submitting quiz:', error);
     }
   };
+  
 
   if (quiz.length === 0) {
     return <div className="loading">Loading...</div>;
   }
 
-  // Hozirgi savolni olish
   const currentQuestion = quiz[currentQuestionIndex];
   if (!currentQuestion) {
     return <div className="no-question">Question not found</div>;
@@ -110,11 +120,16 @@ const Test = () => {
       <div className="timer">
         Time left: {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
       </div>
-      {isSubmitted && <div className="results">Thank you for completing the quiz!</div>}
+      {isSubmitted && results && (
+        <div className="results">
+          <h3>Quiz Results</h3>
+          <p>To'g'ri javoblar: {results.correctCount}</p>
+          <p>Jami savollar: {results.totalQuestions}</p>
+          <p>To'g'ri topish foizi: {results.percentage}%</p>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Test;
-
-

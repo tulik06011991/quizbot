@@ -1,8 +1,8 @@
-// const express = require('express');
-// const router = express.Router();
-// const { finishQuiz } = require('../controller/javob');
+const express = require('express');
+const router = express.Router();
+const quizController = require('../controller/javob'); // To'g'ri import
 
-// // Testni yakunlash va natijani hisoblash uchun route
-// router.post('/quiz/finish', finishQuiz);
+// Foydalanuvchi javoblarini tekshirish uchun yo'l
+router.post('/check-answers', quizController.checkAnswers);
 
-// module.exports = router;
+module.exports = router;

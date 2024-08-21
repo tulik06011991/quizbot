@@ -16,10 +16,22 @@ const getQuiz = async (req, res) => {
       const correctAnswers = await CorrectAnswer.find({ questionId: question._id });
 
       // Variantlarni formatlash
-      const formattedOptions = options.map(option => ({
-        option: option.option,
-        isCorrect: correctAnswers.some(correctAnswer => correctAnswer.correctOptionId.equals(option._id))
-      }));
+      const formattedOptions = options.map(option => {
+        let displayOption = option.option;
+        
+        // To'g'ri variantni tekshirish
+        const isCorrect = correctAnswers.some(correctAnswer => correctAnswer.correctOptionId.equals(option._id));
+        
+        // Agar to'g'ri variant bo'lsa, nuqtani olib tashlash
+        if (isCorrect) {
+          displayOption = displayOption.replace(/^\.\s*/, ''); // Nuqtani olib tashlash
+        }
+
+        return {
+          option: displayOption,
+          isCorrect: isCorrect
+        };
+      });
 
       quiz.push({
         question: question.question,
@@ -32,5 +44,6 @@ const getQuiz = async (req, res) => {
     res.status(500).json({ message: 'Xatolik yuz berdi' });
   }
 };
+
 
 module.exports = { getQuiz };
