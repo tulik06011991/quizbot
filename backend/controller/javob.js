@@ -5,8 +5,8 @@ const User = require('../Model/ModelSchema');
 
 const checkQuizAnswers = async (req, res) => {
   const { userId, answers } = req.body;
-  console.log(userId)
-  console.log(answers)
+  console.log(userId);
+  console.log(answers);
 
   try {
     const user = await User.findById(userId);
@@ -18,8 +18,8 @@ const checkQuizAnswers = async (req, res) => {
     const totalQuestions = Object.keys(answers).length;
 
     for (const questionIndex in answers) {
-      const selectedVariantIndex = answers[questionIndex];
-      const variant = await Variant.findOne({ _id: selectedVariantIndex });
+      const selectedVariantId = answers[questionIndex];
+      const variant = await Variant.findOne({ _id: selectedVariantId });
 
       if (!variant) {
         return res.status(404).json({ error: 'Variant not found' });
@@ -30,10 +30,14 @@ const checkQuizAnswers = async (req, res) => {
       }
     }
 
+    // Foizni hisoblash
+    const percentage = (score / totalQuestions) * 100;
+
     res.status(200).json({ 
       message: 'Quiz checked successfully',
       score,
-      totalQuestions
+      totalQuestions,
+      percentage: percentage.toFixed(2) // To'rtinchi raqamgacha aniqroq
     });
 
   } catch (error) {
