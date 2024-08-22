@@ -9,7 +9,8 @@ const Quiz = () => {
   const [error, setError] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [timeUp, setTimeUp] = useState(false); // Timer tugaganligi holati
-  const [submitted, setSubmitted] = useState(false); // Formani yuborish holati
+  const [submitted, setSubmitted] = useState(false);
+  const [natija , setNatija] = useState({}) // Formani yuborish holati
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -43,10 +44,11 @@ const Quiz = () => {
     const userId = localStorage.getItem('userId'); // localStorage dan userId olish
 
     try {
-      await axios.post('http://localhost:5000/test/submit', {
+      const response = await axios.post('http://localhost:5000/test/submit', {
         userId,
         answers: selectedOptions
       });
+      setNatija(response)
       setSubmitted(true);
       alert('Quiz submitted successfully!');
     } catch (err) {
@@ -56,6 +58,7 @@ const Quiz = () => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
+console.log(natija);
 
   return (
     <div className="quiz-container">
