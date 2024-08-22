@@ -5,6 +5,8 @@ const User = require('../Model/ModelSchema');
 
 const checkQuizAnswers = async (req, res) => {
   const { userId, answers } = req.body;
+  console.log(userId)
+  console.log(answers)
 
   try {
     const user = await User.findById(userId);

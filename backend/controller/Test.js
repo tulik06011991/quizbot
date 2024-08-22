@@ -1,5 +1,5 @@
 const Question = require('../Model/savol'); // Savol modeli
-const Variant = require('../Model/variant');   // Variant modeli
+const Variant = require('../Model/variant'); // Variant modeli
 
 // Savollar va variantlarni olish va foydalanuvchiga ko'rsatish
 async function getQuiz(req, res) {
@@ -18,8 +18,9 @@ async function getQuiz(req, res) {
       quiz.push({
         question: question.text,
         variants: variants.map(variant => ({
+          _id: variant._id,        // Variantning IDsi
           text: variant.text,
-          
+          isCorrect: variant.isCorrect
         }))
       });
     }

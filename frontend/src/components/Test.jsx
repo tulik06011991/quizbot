@@ -26,10 +26,10 @@ const Quiz = () => {
     fetchQuiz();
   }, []);
 
-  const handleOptionChange = (questionIndex, variantIndex) => {
+  const handleOptionChange = (questionIndex, variantId) => {
     setSelectedOptions(prev => ({
       ...prev,
-      [questionIndex]: variantIndex
+      [questionIndex]: variantId
     }));
   };
 
@@ -56,7 +56,7 @@ const Quiz = () => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
-  
+
   return (
     <div className="quiz-container">
       <div className="timer-container">
@@ -80,15 +80,15 @@ const Quiz = () => {
             <div key={index} className="question-container">
               <p className="question-text">{item.question}</p>
               <ul className="variant-list">
-                {item.variants.map((variant, vIndex) => (
-                  <li key={vIndex} className="variant-item">
+                {item.variants.map((variant) => (
+                  <li key={variant._id} className="variant-item">
                     <label>
                       <input
                         type="radio"
                         name={`question-${index}`}
-                        value={vIndex}
-                        checked={selectedOptions[index] === vIndex}
-                        onChange={() => handleOptionChange(index, vIndex)}
+                        value={variant._id}
+                        checked={selectedOptions[index] === variant._id}
+                        onChange={() => handleOptionChange(index, variant._id)}
                         disabled={timeUp} // Timer tugaganidan keyin variantlarni tanlashni bloklash
                       />
                       {variant.text}
