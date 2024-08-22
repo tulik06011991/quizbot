@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const Variant = require('../Model/variant');
 const User = require('../Model/ModelSchema');
+const Result = require('../Model/natijalar'); // Natijalar modelini qo'shamiz
 
 const checkQuizAnswers = async (req, res) => {
   const { userId, answers } = req.body;
@@ -33,8 +34,18 @@ const checkQuizAnswers = async (req, res) => {
     // Foizni hisoblash
     const percentage = (score / totalQuestions) * 100;
 
+    // Natijalarni saqlash
+    const result = new Result({
+      userId,
+      score,
+      totalQuestions,
+      percentage: percentage.toFixed(2)
+    });
+
+    await result.save();
+
     res.status(200).json({ 
-      message: 'Quiz checked successfully',
+      message: 'Quiz checked and result saved successfully',
       score,
       totalQuestions,
       percentage: percentage.toFixed(2) // To'rtinchi raqamgacha aniqroq
