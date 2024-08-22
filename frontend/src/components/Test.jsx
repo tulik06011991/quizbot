@@ -9,6 +9,7 @@ const Quiz = () => {
   const [error, setError] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [timeUp, setTimeUp] = useState(false); // Timer tugaganligi holati
+  const [submitted, setSubmitted] = useState(false); // Formani yuborish holati
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -34,6 +35,23 @@ const Quiz = () => {
 
   const handleTimerComplete = () => {
     setTimeUp(true);
+  };
+
+  const handleSubmit = async () => {
+    if (timeUp || submitted) return; // Agar timer tugagan bo'lsa yoki form yuborilgan bo'lsa, hech narsa qilmaslik
+
+    const userId = localStorage.getItem('userId'); // localStorage dan userId olish
+
+    try {
+      await axios.post('http://localhost:5000/test/submit', {
+        userId,
+        answers: selectedOptions
+      });
+      setSubmitted(true);
+      alert('Quiz submitted successfully!');
+    } catch (err) {
+      alert('Failed to submit quiz. Please try again.');
+    }
   };
 
   if (loading) return <p>Loading...</p>;
@@ -82,6 +100,13 @@ const Quiz = () => {
           ))}
         </div>
       )}
+      <button
+        className="submit-button"
+        onClick={handleSubmit}
+        disabled={timeUp || submitted} // Agar timer tugagan bo'lsa yoki form yuborilgan bo'lsa, tugmani bloklash
+      >
+        Submit
+      </button>
     </div>
   );
 };
