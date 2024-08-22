@@ -45,7 +45,7 @@ const App = () => {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
-          path="/menu"
+          path="/fanlaroquvchi/menu"
           element={
             <PrivateRoute>
               <Menu />
@@ -53,7 +53,7 @@ const App = () => {
           }
         />
         <Route
-          path="/test"
+          path="/fanlaroquvchi/menu/test"
           element={
             <PrivateRoute>
               <Test />

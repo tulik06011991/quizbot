@@ -22,7 +22,7 @@ const Login = () => {
       localStorage.setItem('userId', response.data.user.id);
 
       // Login bo'lgandan keyin foydalanuvchini boshqa sahifaga yo'naltirish
-      window.location.href = '/menu';
+      window.location.href = '/fanlaroquvchi/menu';
     } catch (error) {
       console.error('Login error:', error.response?.data?.message || error.message);
       alert('Invalid credentials. Please try again.');
