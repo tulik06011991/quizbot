@@ -5,15 +5,16 @@ const Test = () => {
   const [quiz, setQuiz] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState({});
-  const [timer, setTimer] = useState(45 * 60); // 45 daqiqa timer
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [results, setResults] = useState(null);
+  const [timer, setTimer] = useState(45 * 60); // 45 daqiqa timer
 
   useEffect(() => {
+    // Savollar va variantlarni olish uchun API chaqiruv
     const fetchQuiz = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/test/quiz');
-        setQuiz(response.data);
+        const response = await axios.get('http://localhost:5000/test/quiz'); // Quizni olish
+        setQuiz(response.data); // Ma'lumotlarni quiz state'iga saqlash
       } catch (error) {
         console.error('Error fetching quiz:', error);
       }
@@ -21,6 +22,7 @@ const Test = () => {
 
     fetchQuiz();
 
+    // Timer funksiyasi
     const interval = setInterval(() => {
       setTimer(prevTimer => {
         if (prevTimer <= 0) {
@@ -35,6 +37,7 @@ const Test = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Variantni tanlash funksiyasi
   const handleOptionChange = (questionIndex, optionIndex) => {
     setSelectedOptions(prevState => ({
       ...prevState,
@@ -42,13 +45,15 @@ const Test = () => {
     }));
   };
 
+  // Keyingi savolga o'tish
   const handleNext = () => {
     setCurrentQuestionIndex(prevIndex => Math.min(prevIndex + 1, quiz.length - 1));
   };
 
+  // Quizni topshirish funksiyasi
   const handleSubmit = async () => {
     try {
-      const userId = localStorage.getItem('userId'); // `localStorage` dan `userId` ni olish
+      const userId = localStorage.getItem('userId'); // `userId` ni `localStorage`dan olish
       if (!userId) {
         console.error('User ID not found in localStorage');
         return;
@@ -56,7 +61,7 @@ const Test = () => {
   
       const answers = quiz.map((q, index) => ({
         questionId: q._id,
-        selectedOptionId: String(selectedOptions[index]) // Convert to string if needed
+        selectedOptionId: String(selectedOptions[index]) // Tanlangan variant
       }));
   
       const response = await axios.post('http://localhost:5000/api/check-answers', {
@@ -64,21 +69,20 @@ const Test = () => {
         answers
       });
   
-      setResults(response.data);
+      setResults(response.data); // Natijalarni saqlash
       setIsSubmitted(true);
     } catch (error) {
       console.error('Error submitting quiz:', error);
     }
   };
-  
 
   if (quiz.length === 0) {
-    return <div className="loading">Loading...</div>;
+    return <div className="loading">Loading...</div>; // Agar savollar hali yuklanmagan bo'lsa
   }
 
   const currentQuestion = quiz[currentQuestionIndex];
   if (!currentQuestion) {
-    return <div className="no-question">Question not found</div>;
+    return <div className="no-question">Question not found</div>; // Agar savol topilmasa
   }
 
   const minutes = Math.floor(timer / 60);
@@ -87,10 +91,10 @@ const Test = () => {
   return (
     <div className="test-container">
       <h2>Question {currentQuestionIndex + 1}</h2>
-      <p>{currentQuestion.question}</p>
+      <p>{currentQuestion.question}</p> {/* Savol matnini chiqarish */}
       <ul className="options-list">
-        {currentQuestion.options && currentQuestion.options.length > 0 ? (
-          currentQuestion.options.map((option, index) => (
+        {currentQuestion.variants && currentQuestion.variants.length > 0 ? (
+          currentQuestion.variants.map((variant, index) => (
             <li key={index} className="option-item">
               <input
                 type="radio"
@@ -99,7 +103,7 @@ const Test = () => {
                 checked={selectedOptions[currentQuestionIndex] === index}
                 onChange={() => handleOptionChange(currentQuestionIndex, index)}
               />
-              {option.option}
+              {variant.text} {/* Variant matnini chiqarish */}
             </li>
           ))
         ) : (
@@ -123,9 +127,9 @@ const Test = () => {
       {isSubmitted && results && (
         <div className="results">
           <h3>Quiz Results</h3>
-          <p>To'g'ri javoblar: {results.correctCount}</p>
-          <p>Jami savollar: {results.totalQuestions}</p>
-          <p>To'g'ri topish foizi: {results.percentage}%</p>
+          <p>Correct answers: {results.correctCount}</p>
+          <p>Total questions: {results.totalQuestions}</p>
+          <p>Accuracy: {results.percentage}%</p>
         </div>
       )}
     </div>

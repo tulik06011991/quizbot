@@ -1,49 +1,36 @@
-// controllers/quizController.js
+const Question = require('../Model/savol'); // Savol modeli
+const Variant = require('../Model/variant');   // Variant modeli
 
-const Question = require('../Model/savol');
-const Option = require('../Model/variant');
-const CorrectAnswer = require('../Model/togri');
-
-const getQuiz = async (req, res) => {
+// Savollar va variantlarni olish va foydalanuvchiga ko'rsatish
+async function getQuiz(req, res) {
   try {
-    // Savollarni olish
+    // Barcha savollarni olish
     const questions = await Question.find();
-    const quiz = [];
 
-    // Har bir savol uchun variantlarni va to'g'ri javoblarni olish
-    for (const question of questions) {
-      const options = await Option.find({ questionId: question._id });
-      const correctAnswers = await CorrectAnswer.find({ questionId: question._id });
+    // Har bir savol uchun uning variantlarini olish
+    let quiz = [];
 
-      // Variantlarni formatlash
-      const formattedOptions = options.map(option => {
-        let displayOption = option.option;
-        
-        // To'g'ri variantni tekshirish
-        const isCorrect = correctAnswers.some(correctAnswer => correctAnswer.correctOptionId.equals(option._id));
-        
-        // Agar to'g'ri variant bo'lsa, nuqtani olib tashlash
-        if (isCorrect) {
-          displayOption = displayOption.replace(/^\.\s*/, ''); // Nuqtani olib tashlash
-        }
+    for (let question of questions) {
+      // Har bir savolga tegishli variantlarni olish
+      const variants = await Variant.find({ questionId: question._id });
 
-        return {
-          option: displayOption,
-          isCorrect: isCorrect
-        };
-      });
-
+      // Savol va uning variantlarini birga yig'ish
       quiz.push({
-        question: question.question,
-        options: formattedOptions
+        question: question.text,
+        variants: variants.map(variant => ({
+          text: variant.text,
+          isCorrect: variant.isCorrect
+        }))
       });
     }
 
-    res.json(quiz);
+    // Foydalanuvchiga savollar va variantlarni JSON formatda qaytarish
+    res.status(200).json(quiz);
   } catch (error) {
-    res.status(500).json({ message: 'Xatolik yuz berdi' });
+    res.status(500).json({ error: 'Server error, could not retrieve quiz.' });
   }
+}
+
+module.exports = {
+  getQuiz
 };
-
-
-module.exports = { getQuiz };
