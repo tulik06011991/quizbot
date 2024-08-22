@@ -53,7 +53,7 @@ const App = () => {
           }
         />
         <Route
-          path="/fanlaroquvchi/menu/test"
+          path="fanlaroquvchi/menu/test"
           element={
             <PrivateRoute>
               <Test />
