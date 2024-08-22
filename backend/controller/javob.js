@@ -3,9 +3,7 @@ const User = require('../Model/ModelSchema');
 const Question = require('../Model/savol');
 const Option = require('../Model/variant');
 const CorrectAnswer = require('../Model/togri');
-const Answer = require('../Model/natijalar'); // Yangi model
-
-
+const Answer = require('../Model/natijalar');
 
 const checkAnswers = async (req, res) => {
   try {
@@ -16,24 +14,27 @@ const checkAnswers = async (req, res) => {
       return res.status(404).json({ message: 'Foydalanuvchi topilmadi' });
     }
 
-    const questionIds = answers.map(answer => mongoose.Types.ObjectId(answer.questionId));
+    const questionIds = answers.map(answer => new mongoose.Types.ObjectId(answer.questionId)); // Correct ObjectId usage
     const correctAnswers = await CorrectAnswer.find({ questionId: { $in: questionIds } });
 
     let correctCount = 0;
     let totalQuestions = answers.length;
 
     for (const answer of answers) {
-      const questionId = mongoose.Types.ObjectId(answer.questionId);
-      const selectedOptionId = mongoose.Types.ObjectId(answer.selectedOptionId);
+      const questionId = new mongoose.Types.ObjectId(answer.questionId); // Correct ObjectId usage
+      const selectedOptionId = new mongoose.Types.ObjectId(answer.selectedOptionId); // Correct ObjectId usage
 
       const correctAnswer = correctAnswers.find(ca =>
         ca.questionId.equals(questionId) &&
         ca.correctOptionId.equals(selectedOptionId)
       );
+      
+      // isCorrectni frontendga yuborishdan saqlanish
       if (correctAnswer) {
         correctCount++;
       }
 
+      // Foydalanuvchi javobini bazaga saqlash
       await Answer.create({
         userId: userId,
         questionId: questionId,
@@ -43,6 +44,7 @@ const checkAnswers = async (req, res) => {
 
     const percentage = (correctCount / totalQuestions) * 100;
 
+    // isCorrect ma'lumotini yubormaslik
     res.json({
       correctCount,
       totalQuestions,
@@ -53,8 +55,5 @@ const checkAnswers = async (req, res) => {
     res.status(500).json({ message: 'Xatolik yuz berdi' });
   }
 };
-
-module.exports = { checkAnswers };
-
 
 module.exports = { checkAnswers };

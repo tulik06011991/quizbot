@@ -19,7 +19,7 @@ async function getQuiz(req, res) {
         question: question.text,
         variants: variants.map(variant => ({
           text: variant.text,
-          isCorrect: variant.isCorrect
+          
         }))
       });
     }
