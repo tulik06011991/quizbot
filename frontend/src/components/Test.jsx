@@ -9,8 +9,8 @@ const Quiz = () => {
   const [error, setError] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [timeUp, setTimeUp] = useState(false); // Timer tugaganligi holati
-  const [submitted, setSubmitted] = useState(false);
-  const [natija , setNatija] = useState({}) // Formani yuborish holati
+  const [submitted, setSubmitted] = useState(false); // Formani yuborish holati
+  const [natija, setNatija] = useState({}); // Natijalarni saqlash
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -27,6 +27,12 @@ const Quiz = () => {
     fetchQuiz();
   }, []);
 
+  useEffect(() => {
+    if (timeUp && !submitted) {
+      handleSubmit(); // Timer tugagandan so'ng submit qilish
+    }
+  }, [timeUp]);
+
   const handleOptionChange = (questionIndex, variantId) => {
     setSelectedOptions(prev => ({
       ...prev,
@@ -39,7 +45,7 @@ const Quiz = () => {
   };
 
   const handleSubmit = async () => {
-    if (timeUp || submitted) return; // Agar timer tugagan bo'lsa yoki form yuborilgan bo'lsa, hech narsa qilmaslik
+    if (submitted) return; // Agar form yuborilgan bo'lsa, hech narsa qilmaslik
 
     const userId = localStorage.getItem('userId'); // localStorage dan userId olish
 
@@ -48,9 +54,8 @@ const Quiz = () => {
         userId,
         answers: selectedOptions
       });
-      setNatija(response)
+      setNatija(response.data); // Natijani saqlash
       setSubmitted(true);
-      alert('Quiz submitted successfully!');
     } catch (err) {
       alert('Failed to submit quiz. Please try again.');
     }
@@ -58,7 +63,6 @@ const Quiz = () => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
-console.log(natija);
 
   return (
     <div className="quiz-container">
@@ -73,9 +77,10 @@ console.log(natija);
           )}
         />
       </div>
-      {timeUp ? (
-        <div className="time-up-message">
-          <p>Time's up!</p>
+      {timeUp || submitted ? (
+        <div className="result-container">
+          <p>Your score: {natija.score} / {natija.totalQuestions}</p>
+          <p>Percentage: {natija.percentage}%</p>
         </div>
       ) : (
         <div className="questions-container">
@@ -103,13 +108,15 @@ console.log(natija);
           ))}
         </div>
       )}
-      <button
-        className="submit-button"
-        onClick={handleSubmit}
-        disabled={timeUp || submitted} // Agar timer tugagan bo'lsa yoki form yuborilgan bo'lsa, tugmani bloklash
-      >
-        Submit
-      </button>
+      {!timeUp && (
+        <button
+          className="submit-button"
+          onClick={handleSubmit}
+          disabled={submitted} // Agar form yuborilgan bo'lsa, tugmani bloklash
+        >
+          Submit
+        </button>
+      )}
     </div>
   );
 };
