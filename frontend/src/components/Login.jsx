@@ -9,28 +9,27 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      // const token = localStorage.getItem('token');
-      // if (!token) {
-      //   alert('No token found! Please login first.');
-      //   return;
-      // }
-
       const response = await axios.post('http://localhost:5000/auth/login',
-        { email, password }, // Bu yerda token yuborilmaydi, faqat email va parol
-       );
+        { email, password }
+      );
 
       if (response.status === 200) {
-        // Admin panelga yo'naltirish
-        alert('Welcome to the admin panel!');
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        window.location.href = '/admin';
-      } else if (response.status === 201) {
-        // User panelga yo'naltirish
-        alert('Welcome to the user panel!');
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        window.location.href = '/menu';
+        const { token, user } = response.data;
+
+        // Token va user ma'lumotlarini localStorage ga saqlash
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+console.log(user);
+
+        if (user.role === true) {
+          // Admin panelga yo'naltirish
+          alert('Welcome to the admin panel!');
+          window.location.href = '/admin';
+        } else {
+          // User panelga yo'naltirish
+          alert('Welcome to the user panel!');
+          window.location.href = '/fanlaroquvchi';
+        }
       }
     } catch (error) {
       console.error('Login error:', error.response?.data?.message || error.message);

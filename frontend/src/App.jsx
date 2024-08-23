@@ -67,7 +67,7 @@ const App = () => {
             <PrivateRoute>
               <Word />
             </PrivateRoute>
-          }
+          } 
         />
         <Route
           path="/fanlar"
