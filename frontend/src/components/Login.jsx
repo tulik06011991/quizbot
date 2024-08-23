@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import axios from 'axios';
+import React, { useState } from 'react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -26,6 +26,30 @@ const Login = () => {
     } catch (error) {
       console.error('Login error:', error.response?.data?.message || error.message);
       alert('Invalid credentials. Please try again.');
+    }
+  };
+
+  const checkAccess = async () => {
+    try {
+      // Tokenni localStorage'dan olish
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('No token found! Please login first.');
+        return;
+      }
+
+      // Tokenni `Authorization` headers orqali yuborish
+      const response = await axios.get('http://localhost:5000/api/protected-route', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      console.log('Protected data:', response.data);
+      alert('Access to protected route granted!');
+    } catch (error) {
+      console.error('Access error:', error.response?.data?.message || error.message);
+      alert('Invalid token or access denied.');
     }
   };
 
@@ -92,6 +116,16 @@ const Login = () => {
             Sign up
           </a>
         </p>
+
+        {/* Example button to check protected route */}
+        <div className="mt-4">
+          <button
+            onClick={checkAccess}
+            className="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+          >
+            Check Protected Route
+          </button>
+        </div>
       </div>
     </div>
   );

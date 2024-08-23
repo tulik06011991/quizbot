@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Auth = require('./routes/Auth')
 const fileUploadRoutes = require('./routes/Word');
-const errorHandler = require('./middleware/errorHandler');
+
 const Test = require('./routes/Test')
 const javob = require('./routes/javob')
 const path = require('path');
