@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Axios orqali API chaqiruvlarini amalga oshirish uchun
+import axios from 'axios';
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('users');
@@ -10,25 +10,20 @@ const AdminPanel = () => {
   const [newQuestion, setNewQuestion] = useState('');
   const [newOptions, setNewOptions] = useState(['', '', '', '']);
 
-  // Sahifa yuklanganda ma'lumotlarni olish
+  const token = localStorage.getItem('token');
+
+  const axiosInstance = axios.create({
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
   useEffect(() => {
-    const token = localStorage.getItem('token'); // Tokenni localStorage'dan olish
-
-    const axiosInstance = axios.create({
-      headers: {
-        'Authorization': `Bearer ${token}` // Tokenni Authorization headerga qo'shish
-      }
-    });
-
     // Foydalanuvchilar ro'yxatini olish
     if (activeTab === 'users') {
       axiosInstance.get('http://localhost:5000/api/results')
-        .then(response => {
-          setUsers(response.data); // Foydalanuvchilar ro'yxatini o'rnatish
-        })
-        .catch(error => {
-          console.error('Foydalanuvchilarni olishda xatolik:', error);
-        });
+        .then(response => setUsers(response.data))
+        .catch(error => console.error('Foydalanuvchilarni olishda xatolik:', error));
     }
 
     // Savollar ro'yxatini olish
@@ -36,44 +31,54 @@ const AdminPanel = () => {
       axiosInstance.get('http://localhost:5000/savollar/question')
         .then(response => {
           if (Array.isArray(response.data)) {
-            setQuestions(response.data); // Savollarni o'rnatish
+            setQuestions(response.data);
           } else {
             console.error('Savollar massiv formatida emas:', response.data);
           }
         })
-        .catch(error => {
-          console.error('Savollarni olishda xatolik:', error);
-        });
+        .catch(error => console.error('Savollarni olishda xatolik:', error));
     }
 
     // Fanlar ro'yxatini olish
     if (activeTab === 'subjects') {
       axiosInstance.get('/api/subjects')
-        .then(response => {
-          setSubjects(response.data); // Fanlarni o'rnatish
-        })
-        .catch(error => {
-          console.error('Fanlarni olishda xatolik:', error);
-        });
+        .then(response => setSubjects(response.data))
+        .catch(error => console.error('Fanlarni olishda xatolik:', error));
     }
   }, [activeTab]);
 
-  // Savolni o'chirish funksiyasi
-  const deleteQuestion = () => {
+  // Savollarni o'chirish funksiyasi
+  const deleteQuestions = () => {
     axiosInstance.delete('http://localhost:5000/deleteAll/delete')
       .then(response => {
-        alert('Savollar o\'chirildi'); // Savol o'chirilgandan keyin yangilash
+        alert('Savollar va variantlar o\'chirildi');
         setQuestions([]); // Savollarni tozalash
       })
-      .catch(error => {
-        console.error('Savolni o\'chirishda xatolik:', error);
-      });
+      .catch(error => console.error('Savollarni o\'chirishda xatolik:', error));
   };
 
   // Yangi savol qo'shish funksiyasi
   const handleSubmit = () => {
-    console.log('Yangi savol qo\'shildi:', newQuestion, newOptions);
-    setShowModal(false);
+    const newQuestionData = {
+      text: newQuestion,
+      variants: newOptions.map((option, index) => ({
+        text: option,
+        isCorrect: index === 0 // Birinchi variantni to'g'ri deb hisoblash
+      }))
+    };
+
+    axiosInstance.post('http://localhost:5000/api/questions', newQuestionData)
+      .then(response => {
+        alert('Yangi savol qo\'shildi');
+        setShowModal(false);
+        setNewQuestion('');
+        setNewOptions(['', '', '', '']);
+        // Savollarni yangilash
+        axiosInstance.get('http://localhost:5000/savollar/question')
+          .then(response => setQuestions(response.data))
+          .catch(error => console.error('Savollarni olishda xatolik:', error));
+      })
+      .catch(error => console.error('Yangi savol qo\'shishda xatolik:', error));
   };
 
   const handleOptionChange = (index, value) => {
@@ -82,7 +87,6 @@ const AdminPanel = () => {
     setNewOptions(updatedOptions);
   };
 
-  // UI qismi
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar */}
@@ -105,7 +109,7 @@ const AdminPanel = () => {
             onClick={() => setActiveTab('deleteQuestions')} 
             className={`cursor-pointer py-2 ${activeTab === 'deleteQuestions' ? 'bg-gray-600' : ''}`}
           >
-            <button onClick={deleteQuestion}> Umumiy Savollarni O'chirish</button>
+            <button onClick={deleteQuestions}> Umumiy Savollarni O'chirish</button>
           </li>
           <li 
             onClick={() => setActiveTab('subjects')} 
@@ -178,32 +182,23 @@ const AdminPanel = () => {
                     <td className="px-4 py-2">
                       <button 
                         className="bg-red-600 text-white px-2 py-1 rounded mr-2" 
-                        onClick={() => deleteQuestion(question)}
+                        onClick={() => deleteQuestion(question._id)} // `_id` o'rniga to'g'ri ID maydonini qo'llang
                       >
                         O'chirish
                       </button>
                     </td>
                     <td className="px-4 py-2">
-                      <button className="bg-green-600 text-white px-2 py-1 rounded">O'zgartirish</button>
+                      <button 
+                        className="bg-yellow-600 text-white px-2 py-1 rounded"
+                        onClick={() => handleEditQuestion(question._id)} // `_id` o'rniga to'g'ri ID maydonini qo'llang
+                      >
+                        O'zgartirish
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
-
-        {/* Umumiy savollarni o'chirish */}
-        {activeTab === 'deleteQuestions' && (
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Umumiy Savollarni O'chirish</h2>
-            <p>Bu bo'limda barcha savollarni o'chirishingiz mumkin.</p>
-            <button 
-              onClick={deleteQuestion} 
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-            >
-              Barcha Savollarni O'chirish
-            </button>
           </div>
         )}
 
@@ -211,54 +206,45 @@ const AdminPanel = () => {
         {activeTab === 'subjects' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Fanlar ro'yxati</h2>
-            <table className="min-w-full table-auto">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-4 py-2">Fan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subjects.map((subject, index) => (
-                  <tr key={index} className="bg-gray-100">
-                    <td className="px-4 py-2">{subject.name}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ul>
+              {subjects.map((subject, index) => (
+                <li key={index} className="mb-2">{subject.name}</li>
+              ))}
+            </ul>
           </div>
         )}
 
         {/* Yangi savol qo'shish modal */}
         {showModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4">Yangi Savol Qo'shish</h2>
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h3 className="text-lg font-bold mb-4">Yangi Savol Qo'shish</h3>
               <input 
                 type="text" 
+                placeholder="Savol matni" 
                 value={newQuestion} 
                 onChange={(e) => setNewQuestion(e.target.value)} 
-                placeholder="Savolni kiriting..." 
-                className="w-full px-4 py-2 mb-4 border rounded"
+                className="border border-gray-300 rounded w-full p-2 mb-4"
               />
               {newOptions.map((option, index) => (
                 <input 
-                  key={index} 
-                  type="text" 
-                  value={option} 
-                  onChange={(e) => handleOptionChange(index, e.target.value)} 
-                  placeholder={`Variant ${index + 1}`} 
-                  className="w-full px-4 py-2 mb-2 border rounded"
+                  key={index}
+                  type="text"
+                  placeholder={`Variant ${index + 1}`}
+                  value={option}
+                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                  className="border border-gray-300 rounded w-full p-2 mb-2"
                 />
               ))}
               <button 
                 onClick={handleSubmit} 
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
-                Qo'shish
+                Saqlash
               </button>
               <button 
                 onClick={() => setShowModal(false)} 
-                className="ml-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                className="bg-gray-600 text-white px-4 py-2 rounded ml-2 hover:bg-gray-700"
               >
                 Yopish
               </button>

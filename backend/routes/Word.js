@@ -19,6 +19,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Quiz yaratish uchun route
-router.post('/create', middleware,  upload.single('file'), quizController.createQuiz);
+router.post('/create',   upload.single('file'), quizController.createQuiz);
 
 module.exports = router;
