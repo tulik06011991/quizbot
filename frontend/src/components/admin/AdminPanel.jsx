@@ -14,14 +14,15 @@ const AdminPanel = () => {
   useEffect(() => {
     const token = localStorage.getItem('token'); // Tokenni localStorage'dan olish
 
-const axiosInstance = axios.create({
-  headers: {
-    'Authorization': `Bearer ${token}` // Tokenni Authorization headerga qo'shish
-  }
-});
+    const axiosInstance = axios.create({
+      headers: {
+        'Authorization': `Bearer ${token}` // Tokenni Authorization headerga qo'shish
+      }
+    });
+
     // Foydalanuvchilar ro'yxatini olish
     if (activeTab === 'users') {
-     axiosInstance.get('http://localhost:5000/api/results')
+      axiosInstance.get('http://localhost:5000/api/results')
         .then(response => {
           setUsers(response.data); // Foydalanuvchilar ro'yxatini o'rnatish
         })
@@ -29,30 +30,25 @@ const axiosInstance = axios.create({
           console.error('Foydalanuvchilarni olishda xatolik:', error);
         });
     }
-    console.log(users)
-    
 
     // Savollar ro'yxatini olish
     if (activeTab === 'questions') {
       axiosInstance.get('http://localhost:5000/savollar/question')
-      .then(response => {
-        if (Array.isArray(response.data)) {
-          setQuestions(response.data); // Savollarni o'rnatish
-        } else {
-          console.error('Savollar massiv formatida emas:', response.data);
-        }
-      })
-      .catch(error => {
-        console.error('Savollarni olishda xatolik:', error);
-      });
+        .then(response => {
+          if (Array.isArray(response.data)) {
+            setQuestions(response.data); // Savollarni o'rnatish
+          } else {
+            console.error('Savollar massiv formatida emas:', response.data);
+          }
+        })
+        .catch(error => {
+          console.error('Savollarni olishda xatolik:', error);
+        });
     }
-   console.log(questions)
-   
-    
 
     // Fanlar ro'yxatini olish
     if (activeTab === 'subjects') {
-     axiosInstance.get('/api/subjects')
+      axiosInstance.get('/api/subjects')
         .then(response => {
           setSubjects(response.data); // Fanlarni o'rnatish
         })
@@ -64,9 +60,10 @@ const axiosInstance = axios.create({
 
   // Savolni o'chirish funksiyasi
   const deleteQuestion = () => {
-   axiosInstance.delete(`http://localhost:5000/deleteAll/delete`)
+    axiosInstance.delete('http://localhost:5000/deleteAll/delete')
       .then(response => {
-        alert('savollar o"chirildi'); // Savol o'chirilgandan keyin yangilash
+        alert('Savollar o\'chirildi'); // Savol o'chirilgandan keyin yangilash
+        setQuestions([]); // Savollarni tozalash
       })
       .catch(error => {
         console.error('Savolni o\'chirishda xatolik:', error);
@@ -107,8 +104,8 @@ const axiosInstance = axios.create({
           <li 
             onClick={() => setActiveTab('deleteQuestions')} 
             className={`cursor-pointer py-2 ${activeTab === 'deleteQuestions' ? 'bg-gray-600' : ''}`}
-          ><button onClick={deleteQuestion}> Umumiy Savollarni O'chirish</button>
-           
+          >
+            <button onClick={deleteQuestion}> Umumiy Savollarni O'chirish</button>
           </li>
           <li 
             onClick={() => setActiveTab('subjects')} 
@@ -160,40 +157,33 @@ const axiosInstance = axios.create({
             </button>
             <table className="min-w-full table-auto mt-4">
               <thead className="bg-gray-200">
-                <tr  >
-                  
-                  <th className="px-4 py-2 ">Savol</th>
-                  
-                  <th className="px-8 py-2">Amallar</th>
-                  <th className="px-8 py-2"></th>
-                  <th className="px-8 py-2"></th>
-                  
+                <tr>
+                  <th className="px-4 py-2">Savol</th>
+                  <th className="px-8 py-2">Variantlar</th>
+                  <th className="px-8 py-2">O'chirish</th>
+                  <th className="px-8 py-2">O'zgartirish</th>
                 </tr>
               </thead>
               <tbody>
                 {questions.map((question, index) => (
                   <tr key={index} className="bg-gray-100">
-                    
-                     <td className="px-6 py-2">{question.text}</td>
-                    <td className="px-4 py-2 ">
-                      {
-                        questions.variants.map((v, index
-
-                        )=>(
-                          <td className="px-6 py-2">{v.text}</td>
-
-                        ))
-                      }
-                      
-                      
-                    <td className="px-4 py-2">{question.id}</td>
-                    <td className="px-4 py-2">{question.id}</td>
+                    <td className="px-6 py-2">{question.text}</td>
+                    <td className="px-4 py-2">
+                      {question.variants.map((v, idx) => (
+                        <div key={idx} className="mb-1">
+                          {v.text} {v.isCorrect ? '(To\'g\'ri)' : ''}
+                        </div>
+                      ))}
+                    </td>
+                    <td className="px-4 py-2">
                       <button 
                         className="bg-red-600 text-white px-2 py-1 rounded mr-2" 
                         onClick={() => deleteQuestion(question)}
                       >
                         O'chirish
                       </button>
+                    </td>
+                    <td className="px-4 py-2">
                       <button className="bg-green-600 text-white px-2 py-1 rounded">O'zgartirish</button>
                     </td>
                   </tr>
@@ -208,8 +198,11 @@ const axiosInstance = axios.create({
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Umumiy Savollarni O'chirish</h2>
             <p>Bu bo'limda barcha savollarni o'chirishingiz mumkin.</p>
-            <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 mt-4">
-              Savollarni O'chirish
+            <button 
+              onClick={deleteQuestion} 
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Barcha Savollarni O'chirish
             </button>
           </div>
         )}
@@ -217,58 +210,58 @@ const axiosInstance = axios.create({
         {/* Fanlar ro'yxati */}
         {activeTab === 'subjects' && (
           <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Fanlar Ro'yxati</h2>
-            <ul>
-              {subjects.map((subject, index) => (
-                <li key={index} className="mb-2">
-                  <button 
-                    onClick={() => alert(`Fan: ${subject}`)} 
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  >
-                    {subject}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <h2 className="text-xl font-bold mb-4">Fanlar ro'yxati</h2>
+            <table className="min-w-full table-auto">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="px-4 py-2">Fan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subjects.map((subject, index) => (
+                  <tr key={index} className="bg-gray-100">
+                    <td className="px-4 py-2">{subject.name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
         {/* Yangi savol qo'shish modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded shadow-lg">
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
               <h2 className="text-xl font-bold mb-4">Yangi Savol Qo'shish</h2>
               <input 
                 type="text" 
-                placeholder="Savolni kiriting" 
-                className="w-full p-2 mb-4 border rounded"
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
+                value={newQuestion} 
+                onChange={(e) => setNewQuestion(e.target.value)} 
+                placeholder="Savolni kiriting..." 
+                className="w-full px-4 py-2 mb-4 border rounded"
               />
               {newOptions.map((option, index) => (
                 <input 
                   key={index} 
                   type="text" 
+                  value={option} 
+                  onChange={(e) => handleOptionChange(index, e.target.value)} 
                   placeholder={`Variant ${index + 1}`} 
-                  className="w-full p-2 mb-2 border rounded"
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                  className="w-full px-4 py-2 mb-2 border rounded"
                 />
               ))}
-              <div className="flex justify-end">
-                <button 
-                  className="bg-gray-600 text-white px-4 py-2 rounded mr-2" 
-                  onClick={() => setShowModal(false)}
-                >
-                  Bekor qilish
-                </button>
-                <button 
-                  className="bg-blue-600 text-white px-4 py-2 rounded" 
-                  onClick={handleSubmit}
-                >
-                  Qo'shish
-                </button>
-              </div>
+              <button 
+                onClick={handleSubmit} 
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Qo'shish
+              </button>
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="ml-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+              >
+                Yopish
+              </button>
             </div>
           </div>
         )}
