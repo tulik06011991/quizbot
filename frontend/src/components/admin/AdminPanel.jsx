@@ -1,28 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Axios orqali API chaqiruvlarini amalga oshirish uchun
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('users');
+  const [users, setUsers] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState('');
-
-  // Foydalanuvchilar ro'yxati
-  const users = [
-    { name: 'Ali', email: 'ali@gmail.com', score: 90, class: 'A' },
-    { name: 'Vali', email: 'vali@gmail.com', score: 85, class: 'B' },
-  ];
-
-  // Savollar ro'yxati
-  const questions = [
-    { id: 1, question: 'React nima?', options: ['JavaScript kutubxonasi', 'CSS ramkasi'] },
-    { id: 2, question: 'MongoDB nima?', options: ['Ma\'lumotlar bazasi', 'Dasturlash tili'] },
-  ];
-
-  // Fanlar ro'yxati
-  const subjects = ['Matematika', 'Ingliz tili', 'Fizika'];
-
-  // Yangi savol qo'shish uchun
   const [newQuestion, setNewQuestion] = useState('');
   const [newOptions, setNewOptions] = useState(['', '', '', '']);
+
+  // Sahifa yuklanganda ma'lumotlarni olish
+  useEffect(() => {
+    const token = localStorage.getItem('token'); // Tokenni localStorage'dan olish
+
+const axiosInstance = axios.create({
+  headers: {
+    'Authorization': `Bearer ${token}` // Tokenni Authorization headerga qo'shish
+  }
+});
+    // Foydalanuvchilar ro'yxatini olish
+    if (activeTab === 'users') {
+     axiosInstance.get('http://localhost:5000/api/results')
+        .then(response => {
+          setUsers(response.data); // Foydalanuvchilar ro'yxatini o'rnatish
+        })
+        .catch(error => {
+          console.error('Foydalanuvchilarni olishda xatolik:', error);
+        });
+    }
+    console.log(users)
+    
+
+    // Savollar ro'yxatini olish
+    if (activeTab === 'questions') {
+      axiosInstance.get('http://localhost:5000/savollar/question')
+      .then(response => {
+        if (Array.isArray(response.data)) {
+          setQuestions(response.data); // Savollarni o'rnatish
+        } else {
+          console.error('Savollar massiv formatida emas:', response.data);
+        }
+      })
+      .catch(error => {
+        console.error('Savollarni olishda xatolik:', error);
+      });
+    }
+   console.log(questions)
+   
+    
+
+    // Fanlar ro'yxatini olish
+    if (activeTab === 'subjects') {
+     axiosInstance.get('/api/subjects')
+        .then(response => {
+          setSubjects(response.data); // Fanlarni o'rnatish
+        })
+        .catch(error => {
+          console.error('Fanlarni olishda xatolik:', error);
+        });
+    }
+  }, [activeTab]);
+
+  // Savolni o'chirish funksiyasi
+  const deleteQuestion = () => {
+   axiosInstance.delete(`http://localhost:5000/deleteAll/delete`)
+      .then(response => {
+        alert('savollar o"chirildi'); // Savol o'chirilgandan keyin yangilash
+      })
+      .catch(error => {
+        console.error('Savolni o\'chirishda xatolik:', error);
+      });
+  };
+
+  // Yangi savol qo'shish funksiyasi
+  const handleSubmit = () => {
+    console.log('Yangi savol qo\'shildi:', newQuestion, newOptions);
+    setShowModal(false);
+  };
 
   const handleOptionChange = (index, value) => {
     const updatedOptions = [...newOptions];
@@ -30,16 +85,7 @@ const AdminPanel = () => {
     setNewOptions(updatedOptions);
   };
 
-  const handleSubmit = () => {
-    console.log('Yangi savol qo\'shildi:', newQuestion, newOptions);
-    setShowModal(false);
-  };
-
-  const handleSubjectClick = (subject) => {
-    setSelectedSubject(subject);
-    setActiveTab('subjectDetail');
-  };
-
+  // UI qismi
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar */}
@@ -61,8 +107,8 @@ const AdminPanel = () => {
           <li 
             onClick={() => setActiveTab('deleteQuestions')} 
             className={`cursor-pointer py-2 ${activeTab === 'deleteQuestions' ? 'bg-gray-600' : ''}`}
-          >
-            Umumiy Savollarni O'chirish
+          ><button onClick={deleteQuestion}> Umumiy Savollarni O'chirish</button>
+           
           </li>
           <li 
             onClick={() => setActiveTab('subjects')} 
@@ -75,6 +121,7 @@ const AdminPanel = () => {
 
       {/* Main Content */}
       <div className="w-full lg:w-3/4 bg-gray-100 p-6">
+        {/* Foydalanuvchilar ro'yxati */}
         {activeTab === 'users' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Foydalanuvchilar ro'yxati</h2>
@@ -90,8 +137,8 @@ const AdminPanel = () => {
               <tbody>
                 {users.map((user, index) => (
                   <tr key={index} className="bg-gray-100">
-                    <td className="px-4 py-2">{user.name}</td>
-                    <td className="px-4 py-2">{user.email}</td>
+                    <td className="px-4 py-2">{user.userId.name}</td>
+                    <td className="px-4 py-2">{user.userId.email}</td>
                     <td className="px-4 py-2">{user.score}</td>
                     <td className="px-4 py-2">{user.class}</td>
                   </tr>
@@ -101,6 +148,7 @@ const AdminPanel = () => {
           </div>
         )}
 
+        {/* Savollar ro'yxati */}
         {activeTab === 'questions' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Savollar ro'yxati</h2>
@@ -112,19 +160,32 @@ const AdminPanel = () => {
             </button>
             <table className="min-w-full table-auto mt-4">
               <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-4 py-2">ID</th>
-                  <th className="px-4 py-2">Savol</th>
-                  <th className="px-4 py-2">Amallar</th>
+                <tr  >
+                  
+                  <th className="px-4 py-2 ">Savol</th>
+                  
+                  <th className="px-8 py-2">Amallar</th>
+                  <th className="px-8 py-2"></th>
+                  <th className="px-8 py-2"></th>
+                  
                 </tr>
               </thead>
               <tbody>
                 {questions.map((question, index) => (
                   <tr key={index} className="bg-gray-100">
+                    
+                     <td className="px-6 py-2">{question.text}</td>
+                    <td className="px-4 py-2 ">
+                      
+                      
                     <td className="px-4 py-2">{question.id}</td>
-                    <td className="px-4 py-2">{question.question}</td>
-                    <td className="px-4 py-2">
-                      <button className="bg-red-600 text-white px-2 py-1 rounded mr-2">O'chirish</button>
+                    <td className="px-4 py-2">{question.id}</td>
+                      <button 
+                        className="bg-red-600 text-white px-2 py-1 rounded mr-2" 
+                        onClick={() => deleteQuestion(question)}
+                      >
+                        O'chirish
+                      </button>
                       <button className="bg-green-600 text-white px-2 py-1 rounded">O'zgartirish</button>
                     </td>
                   </tr>
@@ -134,6 +195,7 @@ const AdminPanel = () => {
           </div>
         )}
 
+        {/* Umumiy savollarni o'chirish */}
         {activeTab === 'deleteQuestions' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Umumiy Savollarni O'chirish</h2>
@@ -144,6 +206,7 @@ const AdminPanel = () => {
           </div>
         )}
 
+        {/* Fanlar ro'yxati */}
         {activeTab === 'subjects' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Fanlar Ro'yxati</h2>
@@ -151,7 +214,7 @@ const AdminPanel = () => {
               {subjects.map((subject, index) => (
                 <li key={index} className="mb-2">
                   <button 
-                    onClick={() => handleSubjectClick(subject)} 
+                    onClick={() => alert(`Fan: ${subject}`)} 
                     className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   >
                     {subject}
@@ -162,47 +225,42 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {activeTab === 'subjectDetail' && (
-          <button>
-
-            <a href="/admin/word" className="px-6 py-3 bg-blue-500 text-white text-lg rounded-full shadow-lg hover:bg-blue-400 transition duration-300" >Start Quiz</a>
-          </button>
-        )}
-
-        {/* Modal for adding new question */}
+        {/* Yangi savol qo'shish modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <div className="bg-white p-6 rounded shadow-lg">
               <h2 className="text-xl font-bold mb-4">Yangi Savol Qo'shish</h2>
               <input 
                 type="text" 
-                placeholder="Savol" 
-                value={newQuestion} 
+                placeholder="Savolni kiriting" 
+                className="w-full p-2 mb-4 border rounded"
+                value={newQuestion}
                 onChange={(e) => setNewQuestion(e.target.value)}
-                className="w-full p-2 border mb-4 rounded"
               />
               {newOptions.map((option, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  placeholder={`Variant ${index + 1}`}
+                <input 
+                  key={index} 
+                  type="text" 
+                  placeholder={`Variant ${index + 1}`} 
+                  className="w-full p-2 mb-2 border rounded"
                   value={option}
                   onChange={(e) => handleOptionChange(index, e.target.value)}
-                  className="w-full p-2 border mb-2 rounded"
                 />
               ))}
-              <button 
-                onClick={handleSubmit} 
-                className="bg-green-600 text-white px-4 py-2 rounded mr-2"
-              >
-                              Qo'shish
-              </button>
-              <button 
-                onClick={() => setShowModal(false)} 
-                className="bg-gray-500 text-white px-4 py-2 rounded"
-              >
-                Yopish
-              </button>
+              <div className="flex justify-end">
+                <button 
+                  className="bg-gray-600 text-white px-4 py-2 rounded mr-2" 
+                  onClick={() => setShowModal(false)}
+                >
+                  Bekor qilish
+                </button>
+                <button 
+                  className="bg-blue-600 text-white px-4 py-2 rounded" 
+                  onClick={handleSubmit}
+                >
+                  Qo'shish
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -212,4 +270,3 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
-

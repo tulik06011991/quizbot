@@ -9,7 +9,7 @@ const verifyToken = (req, res, next) => {
   }
 
   // Tokenni tekshirish
-  jwt.verify(token, JWT_SECRET, async (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: 'Invalid token' }); // Yaroqsiz token
     }
