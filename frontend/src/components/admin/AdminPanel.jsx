@@ -176,6 +176,14 @@ const axiosInstance = axios.create({
                     
                      <td className="px-6 py-2">{question.text}</td>
                     <td className="px-4 py-2 ">
+                      {
+                        questions.variants.map((v, index
+
+                        )=>(
+                          <td className="px-6 py-2">{v.text}</td>
+
+                        ))
+                      }
                       
                       
                     <td className="px-4 py-2">{question.id}</td>

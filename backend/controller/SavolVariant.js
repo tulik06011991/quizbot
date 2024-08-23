@@ -1,15 +1,48 @@
-const Question = require('../Model/savol');
+
 
 // Savollar ro'yxatini olish
-const getQuestions = async (req, res) => {
+// controllers/questionController.js
+
+const Question = require('../Model/savol');
+const Variant = require('../Model/variant');
+
+// Savollarni va variantlarni olish
+
+
+// Savollarni va variantlarni olish
+const getQuestionsWithVariants = async (req, res) => {
   try {
-    const questions = await Question.find(); // Savollarni olish
-    res.status(200).json(questions); // Savollarni qaytarish
+    // Barcha savollarni olish
+    const questions = await Question.find().exec();
+
+    // Har bir savol uchun uning variantlarini olish
+    const questionsWithVariants = await Promise.all(questions.map(async (question) => {
+      const variants = await Variant.find({ questionId: question._id })
+        .select('text isCorrect') // Faqat kerakli maydonlarni tanlash
+        .exec();
+      return {
+        ...question.toObject(), // Savolni obyektga o'zgartirish
+        variants: variants.map(variant => ({
+          text: variant.text,
+          isCorrect: variant.isCorrect
+        })) // Variantlarni kerakli formatda qaytarish
+      };
+    }));
+
+    res.status(200).json(questionsWithVariants);
+    console.log(questionsWithVariants)
+    
   } catch (error) {
-    console.error('Savollarni olishda xatolik:', error);
-    res.status(500).json({ message: 'Savollarni olishda xatolik' });
+    res.status(500).json({ message: 'Xatolik yuz berdi', error });
   }
 };
+
+module.exports = {
+  getQuestionsWithVariants
+};
+
+
+
 
 // Savolni qo'shish
 const addQuestion = async (req, res) => {
@@ -40,7 +73,7 @@ const deleteQuestion = async (req, res) => {
 };
 
 module.exports = {
-  getQuestions,
+  getQuestionsWithVariants,
   addQuestion,
   deleteQuestion,
 };
