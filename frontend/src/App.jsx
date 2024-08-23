@@ -62,7 +62,7 @@ const App = () => {
           }
         />
         <Route
-          path="/word"
+          path="/admin/word"
           element={
             <PrivateRoute>
               <Word />

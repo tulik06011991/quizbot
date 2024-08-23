@@ -163,11 +163,10 @@ const AdminPanel = () => {
         )}
 
         {activeTab === 'subjectDetail' && (
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4">{selectedSubject} Fani</h2>
-            <p>Bu yerda {selectedSubject} fani bo'yicha savollar va ma'lumotlar ko'rsatiladi.</p>
-            {/* Siz {selectedSubject} fani bo'yicha tegishli ma'lumotlarni bu yerda chiqarishingiz mumkin */}
-          </div>
+          <button>
+
+            <a href="/admin/word" className="px-6 py-3 bg-blue-500 text-white text-lg rounded-full shadow-lg hover:bg-blue-400 transition duration-300" >Start Quiz</a>
+          </button>
         )}
 
         {/* Modal for adding new question */}
