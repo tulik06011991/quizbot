@@ -11,6 +11,7 @@ import Word from './components/Word';
 import Fanlar from './components/Fanlar';
 import FanlarOquvchi from './components/FanlarOquchi'
 import Menu from './components/Menu';
+import AdminPanel from './components/admin/AdminPanel';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token'); 
@@ -81,6 +82,14 @@ const App = () => {
           element={
             <PrivateRoute>
               <FanlarOquvchi />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminPanel />
             </PrivateRoute>
           }
         />
