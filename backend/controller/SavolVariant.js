@@ -30,7 +30,7 @@ const getQuestionsWithVariants = async (req, res) => {
     }));
 
     res.status(200).json(questionsWithVariants);
-    console.log(questionsWithVariants)
+    // console.log(questionsWithVariants)
     
   } catch (error) {
     res.status(500).json({ message: 'Xatolik yuz berdi', error });
