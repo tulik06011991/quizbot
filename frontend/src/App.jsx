@@ -11,6 +11,7 @@ import Word from './components/Word';
 import Fanlar from './components/Fanlar';
 import FanlarOquvchi from './components/FanlarOquchi'
 import Menu from './components/Menu';
+import AdminPanel from './components/admin/AdminPanel';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token'); 
@@ -45,7 +46,7 @@ const App = () => {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
-          path="/menu"
+          path="/fanlaroquvchi/menu"
           element={
             <PrivateRoute>
               <Menu />
@@ -53,7 +54,7 @@ const App = () => {
           }
         />
         <Route
-          path="/test"
+          path="fanlaroquvchi/menu/test"
           element={
             <PrivateRoute>
               <Test />
@@ -61,12 +62,12 @@ const App = () => {
           }
         />
         <Route
-          path="/word"
+          path="/admin/word"
           element={
             <PrivateRoute>
               <Word />
             </PrivateRoute>
-          }
+          } 
         />
         <Route
           path="/fanlar"
@@ -81,6 +82,14 @@ const App = () => {
           element={
             <PrivateRoute>
               <FanlarOquvchi />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminPanel />
             </PrivateRoute>
           }
         />

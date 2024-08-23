@@ -1,8 +1,8 @@
+// routes/javob.js
 const express = require('express');
 const router = express.Router();
-const quizController = require('../controller/javob'); // To'g'ri import
+const { checkQuizAnswers } = require('../controller/javob'); // Kontroller import
 
-// Foydalanuvchi javoblarini tekshirish uchun yo'l
-router.post('/check-answers', quizController.checkAnswers);
+router.post('/submit', checkQuizAnswers); // Kontroller funksiyasini qo'shish
 
 module.exports = router;

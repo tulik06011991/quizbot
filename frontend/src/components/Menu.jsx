@@ -11,7 +11,7 @@ const Menu = () => {
       <p className="text-gray-600 mb-8">Test your knowledge and improve your skills</p>
       
       <button >
-         <a href="/test" className="px-6 py-3 bg-blue-500 text-white text-lg rounded-full shadow-lg hover:bg-blue-400 transition duration-300" >Start Quiz</a>
+         <a href="/fanlaroquvchi/menu/test" className="px-6 py-3 bg-blue-500 text-white text-lg rounded-full shadow-lg hover:bg-blue-400 transition duration-300" >Start Quiz</a>
       </button>
     </main>
 

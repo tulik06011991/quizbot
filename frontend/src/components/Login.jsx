@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import axios from 'axios';
+import React, { useState } from 'react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,23 +9,31 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/auth/login', { email, password });
-      
-      alert('Login successful!');
-      console.log('User logged in:', response.data);
+      const response = await axios.post('http://localhost:5000/auth/login',
+        { email, password }
+      );
 
-      // Token va foydalanuvchi ma'lumotlarini saqlash (masalan, localStorage yoki Context API orqali)
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (response.status === 200) {
+        const { token, user } = response.data;
 
-      // Foydalanuvchi ID'ni alohida saqlash
-      localStorage.setItem('userId', response.data.user.id);
+        // Token va user ma'lumotlarini localStorage ga saqlash
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+console.log(user);
 
-      // Login bo'lgandan keyin foydalanuvchini boshqa sahifaga yo'naltirish
-      window.location.href = '/menu';
+        if (user.role === true) {
+          // Admin panelga yo'naltirish
+          alert('Welcome to the admin panel!');
+          window.location.href = '/admin';
+        } else {
+          // User panelga yo'naltirish
+          alert('Welcome to the user panel!');
+          window.location.href = '/fanlaroquvchi';
+        }
+      }
     } catch (error) {
       console.error('Login error:', error.response?.data?.message || error.message);
-      alert('Invalid credentials. Please try again.');
+      alert('Invalid email or password. Please try again.');
     }
   };
 
@@ -65,13 +73,6 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-          </div>
-
-          {/* Forgot password */}
-          <div className="flex items-center justify-between mb-4">
-            <a href="/forgot-password" className="text-sm text-blue-500 hover:text-blue-700">
-              Forgot Password?
-            </a>
           </div>
 
           {/* Submit button */}

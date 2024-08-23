@@ -59,23 +59,20 @@ const register = async (req, res) => {
 
 
 
-const login = async (req, res) => {
+ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Foydalanuvchini topish
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Parolni tekshirish
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // JWT yaratish
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ 
@@ -92,6 +89,7 @@ const login = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 

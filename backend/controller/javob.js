@@ -1,60 +1,61 @@
+// controllers/quizController.js
 const mongoose = require('mongoose');
+const Variant = require('../Model/variant');
 const User = require('../Model/ModelSchema');
-const Question = require('../Model/savol');
-const Option = require('../Model/variant');
-const CorrectAnswer = require('../Model/togri');
-const Answer = require('../Model/natijalar'); // Yangi model
+const Result = require('../Model/natijalar'); // Natijalar modelini qo'shamiz
 
+const checkQuizAnswers = async (req, res) => {
+  const { userId, answers } = req.body;
+  console.log(userId);
+  console.log(answers);
 
-
-const checkAnswers = async (req, res) => {
   try {
-    const { userId, answers } = req.body;
-
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'Foydalanuvchi topilmadi' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    const questionIds = answers.map(answer => mongoose.Types.ObjectId(answer.questionId));
-    const correctAnswers = await CorrectAnswer.find({ questionId: { $in: questionIds } });
+    let score = 0;
+    const totalQuestions = Object.keys(answers).length;
 
-    let correctCount = 0;
-    let totalQuestions = answers.length;
+    for (const questionIndex in answers) {
+      const selectedVariantId = answers[questionIndex];
+      const variant = await Variant.findOne({ _id: selectedVariantId });
 
-    for (const answer of answers) {
-      const questionId = mongoose.Types.ObjectId(answer.questionId);
-      const selectedOptionId = mongoose.Types.ObjectId(answer.selectedOptionId);
-
-      const correctAnswer = correctAnswers.find(ca =>
-        ca.questionId.equals(questionId) &&
-        ca.correctOptionId.equals(selectedOptionId)
-      );
-      if (correctAnswer) {
-        correctCount++;
+      if (!variant) {
+        return res.status(404).json({ error: 'Variant not found' });
       }
 
-      await Answer.create({
-        userId: userId,
-        questionId: questionId,
-        selectedOptionId: selectedOptionId
-      });
+      if (variant.isCorrect) {
+        score += 1;
+      }
     }
 
-    const percentage = (correctCount / totalQuestions) * 100;
+    // Foizni hisoblash
+    const percentage = (score / totalQuestions) * 100;
 
-    res.json({
-      correctCount,
+    // Natijalarni saqlash
+    const result = new Result({
+      userId,
+      score,
       totalQuestions,
       percentage: percentage.toFixed(2)
     });
+
+    await result.save();
+
+    res.status(200).json({ 
+      message: 'Quiz checked and result saved successfully',
+      score,
+      totalQuestions,
+      percentage: percentage.toFixed(2) // To'rtinchi raqamgacha aniqroq
+    });
+
   } catch (error) {
-    console.error('Error checking answers:', error);
-    res.status(500).json({ message: 'Xatolik yuz berdi' });
+    res.status(500).json({ error: 'Server error, could not check answers.' });
   }
 };
 
-module.exports = { checkAnswers };
-
-
-module.exports = { checkAnswers };
+module.exports = {
+  checkQuizAnswers
+};

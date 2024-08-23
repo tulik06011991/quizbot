@@ -1,10 +1,13 @@
 // models/Answer.js
+// models/result.js
 const mongoose = require('mongoose');
 
-const answerSchema = new mongoose.Schema({
+const resultSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true },
-  selectedOptionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true }
+  score: { type: Number, required: true },
+  totalQuestions: { type: Number, required: true },
+  percentage: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Answer', answerSchema);
+module.exports = mongoose.model('Result', resultSchema);
