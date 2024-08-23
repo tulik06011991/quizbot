@@ -10,17 +10,17 @@ async function getQuiz(req, res) {
     // Har bir savol uchun uning variantlarini olish
     let quiz = [];
 
-<<<<<<< HEAD
+
       // Variantlarni formatlash
       const formattedOptions = options.map(option => ({
         option: option.option,
         isCorrect: correctAnswers.some(correctAnswer => correctAnswer.correctOptionId.equals(option._id))
       }));
-=======
+
     for (let question of questions) {
       // Har bir savolga tegishli variantlarni olish
       const variants = await Variant.find({ questionId: question._id });
->>>>>>> 1c11dd6e1b72261bb96265ba74d67f4aa1baa3c1
+
 
       // Savol va uning variantlarini birga yig'ish
       quiz.push({
@@ -43,8 +43,6 @@ async function getQuiz(req, res) {
 module.exports = {
   getQuiz
 };
-<<<<<<< HEAD
+
 
 module.exports = { getQuiz };
-=======
->>>>>>> 1c11dd6e1b72261bb96265ba74d67f4aa1baa3c1
