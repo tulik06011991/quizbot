@@ -9,47 +9,32 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/auth/login', { email, password });
-      
-      alert('Login successful!');
-      console.log('User logged in:', response.data);
+      // const token = localStorage.getItem('token');
+      // if (!token) {
+      //   alert('No token found! Please login first.');
+      //   return;
+      // }
 
-      // Token va foydalanuvchi ma'lumotlarini saqlash (masalan, localStorage yoki Context API orqali)
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const response = await axios.post('http://localhost:5000/auth/login',
+        { email, password }, // Bu yerda token yuborilmaydi, faqat email va parol
+       );
 
-      // Foydalanuvchi ID'ni alohida saqlash
-      localStorage.setItem('userId', response.data.user.id);
-
-      // Login bo'lgandan keyin foydalanuvchini boshqa sahifaga yo'naltirish
-      window.location.href = '/fanlaroquvchi/menu';
+      if (response.status === 200) {
+        // Admin panelga yo'naltirish
+        alert('Welcome to the admin panel!');
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        window.location.href = '/admin';
+      } else if (response.status === 201) {
+        // User panelga yo'naltirish
+        alert('Welcome to the user panel!');
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        window.location.href = '/menu';
+      }
     } catch (error) {
       console.error('Login error:', error.response?.data?.message || error.message);
-      alert('Invalid credentials. Please try again.');
-    }
-  };
-
-  const checkAccess = async () => {
-    try {
-      // Tokenni localStorage'dan olish
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('No token found! Please login first.');
-        return;
-      }
-
-      // Tokenni `Authorization` headers orqali yuborish
-      const response = await axios.get('http://localhost:5000/api/protected-route', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      console.log('Protected data:', response.data);
-      alert('Access to protected route granted!');
-    } catch (error) {
-      console.error('Access error:', error.response?.data?.message || error.message);
-      alert('Invalid token or access denied.');
+      alert('Invalid email or password. Please try again.');
     }
   };
 
@@ -91,13 +76,6 @@ const Login = () => {
             />
           </div>
 
-          {/* Forgot password */}
-          <div className="flex items-center justify-between mb-4">
-            <a href="/forgot-password" className="text-sm text-blue-500 hover:text-blue-700">
-              Forgot Password?
-            </a>
-          </div>
-
           {/* Submit button */}
           <div className="mb-4">
             <button
@@ -116,16 +94,6 @@ const Login = () => {
             Sign up
           </a>
         </p>
-
-        {/* Example button to check protected route */}
-        <div className="mt-4">
-          <button
-            onClick={checkAccess}
-            className="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-          >
-            Check Protected Route
-          </button>
-        </div>
       </div>
     </div>
   );

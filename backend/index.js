@@ -27,7 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/parsed', express.static('parsed'));
 app.use('/api', fileUploadRoutes);
-app.use(errorHandler);
+
 app.use('/test', Test)
 app.use('/auth', Auth)
 app.use('/test', javob)
