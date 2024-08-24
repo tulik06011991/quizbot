@@ -7,7 +7,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import NotFound from './components/NotFound'; 
 import Test from './components/Test';
-import Word from './components/Word';
+import Word from './components/admin/Word';
 import Fanlar from './components/Fanlar';
 import FanlarOquvchi from './components/FanlarOquchi'
 import Menu from './components/Menu';
@@ -46,7 +46,7 @@ const App = () => {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
-          path="/fanlaroquvchi/menu"
+          path="/menu"
           element={
             <PrivateRoute>
               <Menu />
@@ -54,7 +54,7 @@ const App = () => {
           }
         />
         <Route
-          path="fanlaroquvchi/menu/test"
+          path="/test"
           element={
             <PrivateRoute>
               <Test />
@@ -62,7 +62,7 @@ const App = () => {
           }
         />
         <Route
-          path="/word"
+          path="/admin/word"
           element={
             <PrivateRoute>
               <Word />
