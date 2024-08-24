@@ -47,7 +47,7 @@ const Quiz = () => {
   const handleSubmit = async () => {
     if (submitted) return; // Agar form yuborilgan bo'lsa, hech narsa qilmaslik
 
-    const userId = localStorage.getItem('userId'); // localStorage dan userId olish
+    const userId = localStorage.getItem('userID'); // localStorage dan userId olish
 
     try {
       const response = await axios.post('http://localhost:5000/test/submit', {
