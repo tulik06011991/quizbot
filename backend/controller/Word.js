@@ -2,7 +2,7 @@ const mammoth = require('mammoth');
 const Question = require('../Model/savol');
 const Variant = require('../Model/variant');
 const CorrectAnswer = require('../Model/togri');
-const fs = require('fs');
+const Fan = require('../Model/newFan');
 
 // Word faylidan matnni o'qish
 async function readWordFile(filePath) {
@@ -46,30 +46,36 @@ function parseTextToQuestions(text) {
 
 // Quiz yaratish
 async function createQuiz(req, res) {
-  if (!req.file) {
-    return res.status(400).json({ error: 'Please select a Word file.' });
+  if (!req.file || !req.body.fan) { // Fan nomini ham olish
+    return res.status(400).json({ error: 'Please select a Word file and provide a fan name.' });
   }
 
   try {
-    const filePath = req.file.path; // Yuklangan faylning yo'li
+    const filePath = req.file.path;
     const text = await readWordFile(filePath);
     const questions = parseTextToQuestions(text);
 
+    // Yangi yoki mavjud fan nomi orqali fan topish yoki yaratish
+    let fan = await Fan.findOne({ name: req.body.fan });
+    if (!fan) {
+      fan = await Fan.create({ name: req.body.fan });
+    }
+
     for (let questionData of questions) {
-      // Savolni saqlash
-      const question = await Question.create({ text: questionData.text });
+      // Savolni saqlash va fanga bog'lash
+      const question = await Question.create({ text: questionData.text, fanId: fan._id });
 
       for (let variantData of questionData.variants) {
         // Variantni saqlash
         const variant = await Variant.create({
-          text: variantData.text, // Matnni nuqta bilan boshlangan qismini olib tashlab saqlash
-          isCorrect: variantData.isCorrect, // To'g'ri yoki noto'g'ri ekanligini saqlash
+          text: variantData.text,
+          isCorrect: variantData.isCorrect,
           questionId: question._id
         });
 
-        // Agar bu to'g'ri variant bo'lsa, CorrectAnswer schema'siga ham saqlaymiz
+        // To'g'ri javobni saqlash
         if (variantData.isCorrect) {
-          await CorrectAnswer.create({ text: variantData.text }); // To'g'ri javobni saqlash
+          await CorrectAnswer.create({ text: variantData.text, questionId: question._id });
         }
       }
     }
@@ -80,6 +86,4 @@ async function createQuiz(req, res) {
   }
 }
 
-module.exports = {
-  createQuiz
-};
+module.exports = { createQuiz };

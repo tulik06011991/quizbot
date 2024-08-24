@@ -7,6 +7,7 @@ const deleteQues = require('./routes/DeleteQues');
 const savolVariant = require('./routes/SavolVariant')
 const Test = require('./routes/Test')
 const javob = require('./routes/javob')
+const fanlar = require('./routes/fanlar')
 const path = require('path');
 const cors = require('cors');
 
@@ -32,6 +33,7 @@ app.use('/api', fileUploadRoutes);
 app.use('/api', resultRoutes);
 app.use('/deleteAll', deleteQues)
 app.use('/savollar', savolVariant)
+app.use('/api', fanlar)
 app.use('/test', Test)
 app.use('/auth', Auth)
 app.use('/test', javob)

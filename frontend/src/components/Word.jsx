@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const Word = () => {
   const [file, setFile] = useState(null);    // Yuklanadigan faylni saqlash
+  const [fan, setFan] = useState('');        // Fan nomini saqlash
   const [uploading, setUploading] = useState(false);  // Yuklash holati
   const [message, setMessage] = useState(''); // Natija haqida xabar
 
@@ -10,19 +11,23 @@ const Word = () => {
     setFile(e.target.files[0]);  // Faylni o'qish
   };
 
+  const handleFanChange = (e) => {
+    setFan(e.target.value); // Fan nomini o'qish
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) {
-      setMessage('Please select a Word file.');
+    if (!file || !fan) {
+      setMessage('Please select a Word file and enter a fan name.');
       return;
     }
 
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('fan', fan);  // Fan nomini ham yuborish
 
     try {
-      // Faylni yuklash
       await axios.post('http://localhost:5000/api/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -40,6 +45,16 @@ const Word = () => {
     <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Upload Word File</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block mb-2 text-sm font-medium text-gray-700">Fan nomi</label>
+          <input
+            type="text"
+            className="block w-full px-4 py-2 text-sm border rounded-md focus:ring focus:ring-opacity-75 focus:ring-indigo-500 focus:border-indigo-500"
+            value={fan}
+            onChange={handleFanChange}
+            required
+          />
+        </div>
         <div className="flex items-center justify-center w-full">
           <label className="flex flex-col items-center w-full h-32 border-4 border-dashed rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
             <div className="flex flex-col items-center justify-center pt-7">

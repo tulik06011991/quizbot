@@ -41,11 +41,13 @@ const AdminPanel = () => {
 
     // Fanlar ro'yxatini olish
     if (activeTab === 'subjects') {
-      axiosInstance.get('/api/subjects')
+      axiosInstance.get('http://localhost:5000/api/fanlar')
         .then(response => setSubjects(response.data))
         .catch(error => console.error('Fanlarni olishda xatolik:', error));
     }
   }, [activeTab]);
+  console.log(subjects);
+  
 
   // Savollarni o'chirish funksiyasi
   const deleteQuestions = () => {
