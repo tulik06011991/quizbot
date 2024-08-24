@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const subjects = [
   { name: 'Ingliz tili', category: 'Tillar' },
@@ -11,12 +13,18 @@ const subjects = [
 
 const Fanlar = () => {
   const [subjectList, setSubjectList] = useState(subjects);
+  const navigate = useNavigate();
 
-  const handleAddSubject = () => {
-    const newSubject = prompt('Yangi fan nomini kiriting:');
-    if (newSubject) {
-      setSubjectList([...subjectList, { name: newSubject, category: 'Yangi fan' }]);
-    }
+  const handleSubjectClick = (subjectName) => {
+    // API so'rov yuborish (masalan, tanlangan fan ma'lumotlarini olish)
+    axios.get(`http://localhost:5000/api/subject/${subjectName}`)
+      .then(response => {
+        // O'zingizga kerakli ma'lumotlar bilan ishlang
+        console.log('Fan ma\'lumotlari:', response.data);
+        // URL ga o'tish
+        navigate(`/subject/${subjectName}`);
+      })
+      .catch(error => console.error('Fan ma\'lumotlarini olishda xatolik:', error));
   };
 
   return (
@@ -24,18 +32,13 @@ const Fanlar = () => {
       <div className="container mx-auto py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-semibold text-gray-800">Fanlar Ro'yxati</h1>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
-            onClick={handleAddSubject}
-          >
-            Yangi Fan Qo'shish
-          </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {subjectList.map((subject, index) => (
             <div
               key={index}
-              className="p-6 bg-white rounded-lg shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105"
+              className="p-6 bg-white rounded-lg shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 cursor-pointer"
+              onClick={() => handleSubjectClick(subject.name)}
             >
               <h2 className="text-xl font-bold text-gray-700 mb-2">{subject.name}</h2>
               <p className="text-gray-600">{subject.category}</p>
