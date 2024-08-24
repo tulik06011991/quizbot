@@ -5,14 +5,13 @@ const Result = require('../Model/natijalar'); // Natijalar modelini qo'shamiz
 
 const checkQuizAnswers = async (req, res) => {
   const { userId, answers } = req.body; // answers obyekti { questionId: variantId } shaklida bo'ladi
+console.log(userId);
 
   try {
     // Foydalanuvchini tekshirish
-    if (User.findById(userId)) {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ error: 'Invalid user ID format' });
     }
-    console.log();
-    
 
     const user = await User.findById(userId);
     if (!user) {
