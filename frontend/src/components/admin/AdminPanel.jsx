@@ -141,7 +141,7 @@ const AdminPanel = () => {
           </li>
           <li
             onClick={handleNewCategoryClick} // Yangi fan kategoriyasini bosganda URL o'zgaradi
-            className="cursor-pointer py-2 bg-blue-600 text-white rounded mt-4"
+            className="cursor-pointer py-2 bg-blue-600 text-white rounded mt-4 px-2"
           >
             Yangi Fan Qo'shish
           </li>
