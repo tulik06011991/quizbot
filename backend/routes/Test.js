@@ -3,6 +3,6 @@ const router = express.Router();
 const { getQuiz } = require('../controller/Test');
 
 // Savollarni olish marshruti
-router.get('/quiz', getQuiz);
+router.get('/quiz/Biologiya', getQuiz);
 
 module.exports = router;
