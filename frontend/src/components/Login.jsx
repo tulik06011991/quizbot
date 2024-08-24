@@ -18,8 +18,7 @@ const Login = () => {
 
         // Token va user ma'lumotlarini localStorage ga saqlash
         localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-console.log(user);
+        localStorage.setItem('userID', JSON.stringify(user.id));
 
         if (user.role === true) {
           // Admin panelga yo'naltirish
