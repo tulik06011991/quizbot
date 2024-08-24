@@ -8,6 +8,15 @@ const checkQuizAnswers = async (req, res) => {
 console.log(userId);
 
   try {
+
+    const validateObjectId = (userId) => {
+      // ID'ni 24 ta hex raqamli string formatida tekshiradi
+      return /^[0-9a-fA-F]{24}$/.test(userId);
+    };
+    
+    const exampleId = '66c82d10a4e9ef40e0aa350f';
+    console.log(validateObjectId(exampleId)); // true yoki false
+    
     // Foydalanuvchini tekshirish
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ error: 'Invalid user ID format' });
