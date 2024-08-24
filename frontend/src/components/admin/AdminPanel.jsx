@@ -88,6 +88,7 @@ const AdminPanel = () => {
       })
       .catch((error) => console.error('Yangi savol qo\'shishda xatolik:', error));
   };
+  console.log(questions)
 
   const handleOptionChange = (index, value) => {
     const updatedOptions = [...newOptions];
@@ -203,7 +204,8 @@ const AdminPanel = () => {
                     <td className="px-8 py-2">
                       <ul>
                         {question.variants.map((variant, idx) => (
-                          <li key={idx}>{variant.text}</li>
+                          <li key={idx}>{variant.text}{variant.isCorrect?('   ','      (to`g`ri)'):(' ')}</li>
+                         
                         ))}
                       </ul>
                     </td>
