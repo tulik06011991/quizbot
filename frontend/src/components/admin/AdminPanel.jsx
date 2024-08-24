@@ -143,7 +143,7 @@ const AdminPanel = () => {
             onClick={handleNewCategoryClick} // Yangi fan kategoriyasini bosganda URL o'zgaradi
             className="cursor-pointer py-2 bg-blue-600 text-white rounded mt-4"
           >
-            Yangi Fan Kategoriyasi Qo'shish
+            Yangi Fan Qo'shish
           </li>
         </ul>
       </div>
