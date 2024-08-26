@@ -218,7 +218,7 @@ const AdminPanel = () => {
                         O'chirish
                       </button>
                     </td>
-                    <td className="px-8 py-2">{question.subject}</td>
+                    <td className="px-8 py-2">{question.fanName}</td>
                   </tr>
                 ))}
               </tbody>

@@ -5,23 +5,25 @@
 
 const Question = require('../Model/savol');
 const Variant = require('../Model/variant');
+const Fan = require('../Model/newFan'); // Fan modelini qo'shamiz
 
-// Savollarni va variantlarni olish
-
-
-// Savollarni va variantlarni olish
 const getQuestionsWithVariants = async (req, res) => {
   try {
     // Barcha savollarni olish
     const questions = await Question.find().exec();
 
-    // Har bir savol uchun uning variantlarini olish
+    // Har bir savol uchun uning variantlarini va fan nomini olish
     const questionsWithVariants = await Promise.all(questions.map(async (question) => {
       const variants = await Variant.find({ questionId: question._id })
         .select('text isCorrect') // Faqat kerakli maydonlarni tanlash
         .exec();
+
+      // Fan ma'lumotlarini olish
+      const fan = await Fan.findById(question.fanId).exec();
+
       return {
         ...question.toObject(), // Savolni obyektga o'zgartirish
+        fanName: fan ? fan.name : 'Unknown', // Fan nomini qo'shish
         variants: variants.map(variant => ({
           text: variant.text,
           isCorrect: variant.isCorrect
@@ -30,16 +32,12 @@ const getQuestionsWithVariants = async (req, res) => {
     }));
 
     res.status(200).json(questionsWithVariants);
-    // console.log(questionsWithVariants)
-    
+
   } catch (error) {
     res.status(500).json({ message: 'Xatolik yuz berdi', error });
   }
 };
 
-module.exports = {
-  getQuestionsWithVariants
-};
 
 
 
