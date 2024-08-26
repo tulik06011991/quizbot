@@ -5,7 +5,7 @@ const Result = require('../Model/natijalar'); // Natijalar modelini qo'shamiz
 
 const checkQuizAnswers = async (req, res) => {
   const { userId, answers } = req.body; // answers obyekti { questionId: variantId } shaklida bo'ladi
-  console.log(answers);
+
 
   try {
     // Foydalanuvchini tekshirish
