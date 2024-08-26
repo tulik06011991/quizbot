@@ -19,25 +19,25 @@ const PrivateRoute = ({ children }) => {
 };
 
 const App = () => {
-  const [userId, setUserId] = useState(null);
+  // const [userId, setUserId] = useState(null);
 
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    setUserId(storedUserId);
+  // useEffect(() => {
+  //   const storedUserId = localStorage.getItem('userID');
+  //   setUserId(storedUserId);
 
-    if (storedUserId) {
-      // Masalan, foydalanuvchi ma'lumotlarini olish uchun so'rov
-      axios.get(`http://localhost:5000/auth/login/${storedUserId}`)
-        .then(response => {
-          console.log('User data:', response.data);
-        })
-        .catch(error => {
-          console.error('User ma\'lumotlarini olishda xatolik:', error);
-        });
-    } else {
-      console.error('Foydalanuvchi ID topilmadi.');
-    }
-  }, []);
+  //   if (storedUserId) {
+  //     // Masalan, foydalanuvchi ma'lumotlarini olish uchun so'rov
+  //     axios.get(`http://localhost:5000/auth/login/${storedUserId}`)
+  //       .then(response => {
+  //         console.log('User data:', response.data);
+  //       })
+  //       .catch(error => {
+  //         console.error('User ma\'lumotlarini olishda xatolik:', error);
+  //       });
+  //   } else {
+  //     console.error('Foydalanuvchi ID topilmadi.');
+  //   }
+  // }, []);
 
   return (
     <Router>
