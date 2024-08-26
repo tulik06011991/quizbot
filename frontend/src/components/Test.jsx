@@ -36,7 +36,7 @@ const Quiz = () => {
   const handleOptionChange = (questionIndex, variantId) => {
     setSelectedOptions(prev => ({
       ...prev,
-       variantId
+      [questionIndex]: variantId
     }));
   };
 
@@ -50,10 +50,17 @@ const Quiz = () => {
     const userId = localStorage.getItem('userID');
     // localStorage dan userId olish
 
+    // Variantlarni yuborish uchun `answers` obyektini tayyorlash
+    const answers = Object.keys(selectedOptions).reduce((acc, questionIndex) => {
+      const variantId = selectedOptions[questionIndex];
+      acc[questionIndex] = variantId;
+      return acc;
+    }, {});
+
     try {
       const response = await axios.post('http://localhost:5000/test/submit', {
         userId, // Foydalanuvchi ID
-        answers: selectedOptions // Savollar va variantlar
+        answers // Savollar va variantlar
       });
       setNatija(response.data); // Natijani saqlash
       setSubmitted(true);
