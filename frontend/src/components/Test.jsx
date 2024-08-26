@@ -36,31 +36,31 @@ const Quiz = () => {
   const handleOptionChange = (questionIndex, variantId) => {
     setSelectedOptions(prev => ({
       ...prev,
-      [questionIndex]: variantId
+       variantId
     }));
   };
 
   const handleTimerComplete = () => {
     setTimeUp(true);
   };
-const handleSubmit = async () => {
-  if (submitted) return; // Agar form yuborilgan bo'lsa, hech narsa qilmaslik
 
-  const userId = localStorage.getItem('userID');
-  // localStorage dan userId olish
+  const handleSubmit = async () => {
+    if (submitted) return; // Agar form yuborilgan bo'lsa, hech narsa qilmaslik
 
-  try {
-    const response = await axios.post('http://localhost:5000/test/submit', {
-      userId, // Foydalanuvchi ID
-      answers: selectedOptions // Savollar va variantlar
-    });
-    setNatija(response.data); // Natijani saqlash
-    setSubmitted(true);
-  } catch (err) {
-    alert('Failed to submit quiz. Please try again.');
-  }
-};
+    const userId = localStorage.getItem('userID');
+    // localStorage dan userId olish
 
+    try {
+      const response = await axios.post('http://localhost:5000/test/submit', {
+        userId, // Foydalanuvchi ID
+        answers: selectedOptions // Savollar va variantlar
+      });
+      setNatija(response.data); // Natijani saqlash
+      setSubmitted(true);
+    } catch (err) {
+      alert('Failed to submit quiz. Please try again.');
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
