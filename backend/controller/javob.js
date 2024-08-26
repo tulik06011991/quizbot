@@ -14,7 +14,7 @@ console.log(userId);
       return /^[0-9a-fA-F]{24}$/.test(userId);
     };
     
-    const exampleId = '66c82d10a4e9ef40e0aa350f';
+    const exampleId = "66c82d10a4e9ef40e0aa350f";
     console.log(validateObjectId(exampleId)); // true yoki false
     
     // Foydalanuvchini tekshirish

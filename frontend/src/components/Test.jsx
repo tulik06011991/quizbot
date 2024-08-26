@@ -47,10 +47,7 @@ const handleSubmit = async () => {
   if (submitted) return; // Agar form yuborilgan bo'lsa, hech narsa qilmaslik
 
   const userId = localStorage.getItem('userID');
-  if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
-    alert('Invalid user ID format');
-    return;
-  } // localStorage dan userId olish
+  // localStorage dan userId olish
 
   try {
     const response = await axios.post('http://localhost:5000/test/submit', {
