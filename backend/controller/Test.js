@@ -28,7 +28,7 @@ async function getQuiz(req, res) {
     // Foydalanuvchiga savollar va variantlarni JSON formatda qaytarish
     res.status(200).json(quiz);
   } catch (error) {
-    res.status(500).json({ error: 'Server error, could not retrieve quiz.' });
+    res.status(500).json({ error: 'Server error, could not retrieve quiz.' })
   }
 }
 
