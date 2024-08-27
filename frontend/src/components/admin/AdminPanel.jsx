@@ -149,19 +149,19 @@ const AdminPanel = () => {
           </li>
           <li
             onClick={() => setActiveTab('questions')}
-            className={`cursor-pointer py-2 ${activeTab === 'questions' ? 'bg-gray-600' : ''}`}
+            className={`cursor-pointer py-2 rounded mt-4 px-2 ${activeTab === 'questions' ? 'bg-gray-600' : ''}`}
           >
             Savollar
           </li>
           <li
             onClick={() => deleteQuestions()}
-            className="cursor-pointer py-2"
+            className="cursor-pointer py-2 rounded mt-4 px-2"
           >
             Umumiy Savollarni O'chirish
           </li>
           <li
             onClick={() => setActiveTab('subjects')}
-            className={`cursor-pointer py-2 ${activeTab === 'subjects' ? 'bg-gray-600' : ''}`}
+            className={`cursor-pointer py-2 rounded mt-4 px-2 ${activeTab === 'subjects' ? 'bg-gray-600' : ''}`}
           >
             Fanlar
           </li>
