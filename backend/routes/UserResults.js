@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const resultController = require('../controller/UsersResult');
+const { deleteUserAndResults , getAllResults} = require('../controller/UsersResult');
 const middleware   = require('../middleware/errorhandler')
 
 // Foydalanuvchilar va ularning natijalarini olish
-router.get('/results',  resultController.getAllResults);
+router.get('/results',  getAllResults);
+router.delete('/result/:id', deleteUserAndResults);
+
 
 // Maxsus userning natijalarini olish
-router.get('/results/:userId', middleware,  resultController.getResultByUserId);
+
 
 module.exports = router;

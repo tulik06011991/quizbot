@@ -2,7 +2,7 @@ const Result = require('../Model/natijalar'); // Result modelini import qilish
 const User = require('../Model/ModelSchema'); // User modelini import qilish
 
 // Foydalanuvchilar va ularning natijalarini olish
-exports.getAllResults = async (req, res) => {
+const getAllResults = async (req, res) => {
   try {
     // Foydalanuvchilar va ularning natijalarini olish
     const results = await Result.find().populate('userId', 'name email'); // userId bilan bog'langan User'ni olish
@@ -13,7 +13,7 @@ exports.getAllResults = async (req, res) => {
 };
 
 // Maxsus userning natijalarini olish
-exports.getResultByUserId = async (req, res) => {
+const getResultByUserId = async (req, res) => {
   try {
     const { userId } = req.params;
     const result = await Result.find({ userId }).populate('userId', 'name email'); // Maxsus foydalanuvchi natijasi
@@ -25,3 +25,32 @@ exports.getResultByUserId = async (req, res) => {
     res.status(500).json({ message: 'Xatolik ro\'y berdi', error });
   }
 };
+; // User modelini import qilish
+
+// Foydalanuvchi va uning natijalarini o'chirish
+const deleteUserAndResults = async (req, res) => {
+  try {
+    const { userId } = req.params;
+console.log(userId);
+
+    // Foydalanuvchining natijalarini o'chirish
+    await Result.deleteMany({ userId });
+
+    // Foydalanuvchini o'chirish
+    const user = await User.findByIdAndDelete(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Foydalanuvchi topilmadi' });
+    }
+
+    res.status(200).json({ message: 'Foydalanuvchi va uning natijalari muvaffaqiyatli o\'chirildi' });
+  } catch (error) {
+    res.status(500).json({ message: 'Xatolik ro\'y berdi', error });
+  }
+};
+
+
+module.exports = {
+  deleteUserAndResults,
+  getAllResults
+}

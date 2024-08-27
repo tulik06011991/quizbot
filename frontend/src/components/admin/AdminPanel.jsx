@@ -13,60 +13,68 @@ const AdminPanel = () => {
   const [newOptions, setNewOptions] = useState(['', '', '', '']);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const navigate = useNavigate();
+  const [Id, setId] = useState(null)
 
   const token = localStorage.getItem('token');
+
   const axiosInstance = axios.create({
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (activeTab === 'users') {
-          const response = await axiosInstance.get('http://localhost:5000/api/results');
-          setUsers(response.data);
-        }
-        if (activeTab === 'questions') {
-          const response = await axiosInstance.get('http://localhost:5000/savollar/question');
+    if (activeTab === 'users') {
+      axiosInstance
+        .get('http://localhost:5000/api/results')
+        .then((response) => setUsers(response.data))
+        .catch((error) => console.error('Foydalanuvchilarni olishda xatolik:', error));
+    }
+
+    if (activeTab === 'questions') {
+      axiosInstance
+        .get('http://localhost:5000/savollar/question')
+        .then((response) => {
           if (Array.isArray(response.data)) {
             setQuestions(response.data);
           } else {
             console.error('Savollar massiv formatida emas:', response.data);
           }
-        }
-        if (activeTab === 'subjects') {
-          const response = await axiosInstance.get('http://localhost:5000/api/fanlar');
-          setSubjects(response.data);
-        }
-      } catch (error) {
-        console.error(`${activeTab} ni olishda xatolik:`, error);
-      }
-    };
+        })
+        .catch((error) => console.error('Savollarni olishda xatolik:', error));
+    }
 
-    fetchData();
+    if (activeTab === 'subjects') {
+      axiosInstance
+        .get('http://localhost:5000/api/fanlar')
+        .then((response) => setSubjects(response.data))
+        .catch((error) => console.error('Fanlarni olishda xatolik:', error));
+    }
   }, [activeTab]);
+  console.log(users);
+  
 
-  const deleteQuestions = async () => {
-    try {
-      await axiosInstance.delete('http://localhost:5000/deleteAll/delete');
-      alert('Savollar va variantlar o\'chirildi');
-      setQuestions([]);
-    } catch (error) {
-      console.error('Savollarni o\'chirishda xatolik:', error);
-    }
+  const deleteQuestions = () => {
+    axiosInstance
+      .delete('http://localhost:5000/deleteAll/delete')
+      .then((response) => {
+        alert('Savollar va variantlar o\'chirildi');
+        setQuestions([]);
+      })
+      .catch((error) => console.error('Savollarni o\'chirishda xatolik:', error));
+  };
+  const deleteUser = (id) => {
+    setId(id)
+    axiosInstance
+      .delete(`http://localhost:5000/api/result/${Id}`, Id)
+      .then((response) => {
+        alert('Foydalanuvchi  o\'chirildi');
+        
+      })
+      .catch((error) => console.error('Savollarni o\'chirishda xatolik:', error));
   };
 
-  const deleteUser = async (userId) => {
-    try {
-      await axiosInstance.delete(`http://localhost:5000/deleteAll/delete/${userId}`);
-      alert('Foydalanuvchi o\'chirildi');
-      setUsers(users.filter(user => user.userId?._id !== userId));
-    } catch (error) {
-      console.error('Foydalanuvchini o\'chirishda xatolik:', error);
-    }
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const newQuestionData = {
       text: newQuestion,
       variants: newOptions.map((option, index) => ({
@@ -75,17 +83,19 @@ const AdminPanel = () => {
       })),
     };
 
-    try {
-      await axiosInstance.post('http://localhost:5000/api/question', newQuestionData);
-      alert('Yangi savol qo\'shildi');
-      setShowModal(false);
-      setNewQuestion('');
-      setNewOptions(['', '', '', '']);
-      const response = await axiosInstance.get('http://localhost:5000/savollar/question');
-      setQuestions(response.data);
-    } catch (error) {
-      console.error('Yangi savol qo\'shishda xatolik:', error);
-    }
+    axiosInstance
+      .post('http://localhost:5000/api/question', newQuestionData)
+      .then((response) => {
+        alert('Yangi savol qo\'shildi');
+        setShowModal(false);
+        setNewQuestion('');
+        setNewOptions(['', '', '', '']);
+        axiosInstance
+          .get('http://localhost:5000/savollar/question')
+          .then((response) => setQuestions(response.data))
+          .catch((error) => console.error('Savollarni olishda xatolik:', error));
+      })
+      .catch((error) => console.error('Yangi savol qo\'shishda xatolik:', error));
   };
 
   const handleOptionChange = (index, value) => {
@@ -94,7 +104,7 @@ const AdminPanel = () => {
     setNewOptions(updatedOptions);
   };
 
-  const handleUpdateQuestion = async () => {
+  const handleUpdateQuestion = () => {
     const updatedQuestionData = {
       text: newQuestion,
       variants: newOptions.map((option, index) => ({
@@ -103,17 +113,19 @@ const AdminPanel = () => {
       })),
     };
 
-    try {
-      await axiosInstance.put(`http://localhost:5000/api/question/${currentQuestion._id}`, updatedQuestionData);
-      alert('Savol yangilandi');
-      setShowUpdateModal(false);
-      setNewQuestion('');
-      setNewOptions(['', '', '', '']);
-      const response = await axiosInstance.get('http://localhost:5000/savollar/question');
-      setQuestions(response.data);
-    } catch (error) {
-      console.error('Savolni yangilashda xatolik:', error);
-    }
+    axiosInstance
+      .put(`http://localhost:5000/api/question/${currentQuestion._id}`, updatedQuestionData)
+      .then((response) => {
+        alert('Savol yangilandi');
+        setShowUpdateModal(false);
+        setNewQuestion('');
+        setNewOptions(['', '', '', '']);
+        axiosInstance
+          .get('http://localhost:5000/savollar/question')
+          .then((response) => setQuestions(response.data))
+          .catch((error) => console.error('Savollarni olishda xatolik:', error));
+      })
+      .catch((error) => console.error('Savolni yangilashda xatolik:', error));
   };
 
   const handleNewCategoryClick = () => {
@@ -145,7 +157,7 @@ const AdminPanel = () => {
             Savollar
           </li>
           <li
-            onClick={deleteQuestions}
+            onClick={() => deleteQuestions()}
             className="cursor-pointer py-2"
           >
             Umumiy Savollarni O'chirish
@@ -180,23 +192,25 @@ const AdminPanel = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
-                  <tr key={user.userId?._id} className="bg-gray-100">
-                    <td className="border px-4 py-2">{user.userId?.name || 'N/A'}</td>
-                    <td className="border px-4 py-2">{user.userId?.email || 'N/A'}</td>
-                    <td className="border px-4 py-2">{user.score}</td>
-                    <td className="border px-4 py-2">{user.percentage}</td>
-                    <td className="border px-4 py-2">
-                      <button
-                        onClick={() => deleteUser(user.userId?._id)}
-                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                      >
-                        O'chirish
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+  {users.map((user, index) => (
+    <tr key={index} className="bg-gray-100">
+      <td className="border px-4 py-2">{user.userId ? user.userId.name : 'N/A'}</td>
+      <td className="border px-4 py-2">{user.userId ? user.userId.email : 'N/A'}</td>
+      <td className="border px-4 py-2">{user.score}</td>
+      <td className="border px-4 py-2">{user.percentage}</td>
+      <td className="border px-4 py-2">{user.userId._id}</td>
+      <td className="border px-4 py-2">
+        <button
+          onClick={() => deleteUser(user.userId._id)}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
+          O'chirish
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
             </table>
           </div>
         )}
@@ -206,32 +220,35 @@ const AdminPanel = () => {
             <h2 className="text-xl font-bold mb-4">Savollar ro'yxati</h2>
             <button
               onClick={() => setShowModal(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
               Yangi Savol Qo'shish
             </button>
-            <table className="min-w-full table-auto">
+            <table className="min-w-full table-auto mt-4">
               <thead className="bg-gray-200">
                 <tr>
                   <th className="px-4 py-2 text-left">Savol</th>
-                  <th className="px-4 py-2 text-left">Variantlar</th>
-                  <th className="px-4 py-2 text-left">To'g'ri Javob</th>
-                  
+                  <th className="px-8 py-2 text-left">Variantlar</th>
+                  <th className="px-8 py-2 text-left">Amallar</th>
                 </tr>
               </thead>
               <tbody>
-                {questions.map((question) => (
-                  <tr key={question._id} className="bg-gray-100">
+                {questions.map((question, index) => (
+                  <tr key={index} className="bg-gray-100">
                     <td className="border px-4 py-2">{question.text}</td>
                     <td className="border px-4 py-2">
-                      {question.variants.map((variant, index) => (
-                        <div key={index}>{variant.text}</div>
+                      {question.variants.map((variant, idx) => (
+                        <div key={idx}>{variant.text}</div>
                       ))}
                     </td>
                     <td className="border px-4 py-2">
-                      {question.variants.find((v) => v.isCorrect)?.text || 'N/A'}
+                      <button
+                        onClick={() => openUpdateModal(question)}
+                        className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+                      >
+                        Yangilash
+                      </button>
                     </td>
-                   
                   </tr>
                 ))}
               </tbody>
@@ -242,90 +259,109 @@ const AdminPanel = () => {
         {activeTab === 'subjects' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Fanlar ro'yxati</h2>
-            <ul>
-              {subjects.map((subject) => (
-                <li key={subject._id} className="py-2 border-b">
-                  {subject.name}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Yangi Savol Qo'shish</h2>
-              <input
-                type="text"
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                placeholder="Savol matni"
-                className="border p-2 w-full mb-4"
-              />
-              {newOptions.map((option, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  placeholder={`Variant ${index + 1}`}
-                  className="border p-2 w-full mb-2"
-                />
-              ))}
-              <button
-                onClick={handleSubmit}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                Saqlash
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 ml-2"
-              >
-                Yopish
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showUpdateModal && currentQuestion && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Savolni Yangilash</h2>
-              <input
-                type="text"
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                placeholder="Savol matni"
-                className="border p-2 w-full mb-4"
-              />
-              {newOptions.map((option, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  placeholder={`Variant ${index + 1}`}
-                  className="border p-2 w-full mb-2"
-                />
-              ))}
-              <button
-                onClick={handleUpdateQuestion}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-              >
-                Yangilash
-              </button>
-              <button
-                onClick={() => setShowUpdateModal(false)}
-                className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 ml-2"
-              >
-                Yopish
-              </button>
-            </div>
+            <table className="min-w-full table-auto">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="px-4 py-2 text-left">Fanning nomi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subjects.map((subject, index) => (
+                  <tr key={index} className="bg-gray-100">
+                    <td className="border px-4 py-2">{subject.name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
+
+      {/* Modal for adding new question */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h3 className="text-lg font-bold mb-4">Yangi Savol Qo'shish</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Savol:</label>
+              <input
+                type="text"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Variantlar:</label>
+              {newOptions.map((option, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  value={option}
+                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                  placeholder={`Variant ${index + 1}`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                />
+              ))}
+            </div>
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Qo'shish
+            </button>
+            <button
+              onClick={() => setShowModal(false)}
+              className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 ml-2"
+            >
+              Yopish
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for updating question */}
+      {showUpdateModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h3 className="text-lg font-bold mb-4">Savolni Yangilash</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Savol:</label>
+              <input
+                type="text"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Variantlar:</label>
+              {newOptions.map((option, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  value={option}
+                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                  placeholder={`Variant ${index + 1}`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                />
+              ))}
+            </div>
+            <button
+              onClick={handleUpdateQuestion}
+              className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+            >
+              Yangilash
+            </button>
+            <button
+              onClick={() => setShowUpdateModal(false)}
+              className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 ml-2"
+            >
+              Yopish
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
