@@ -17,14 +17,20 @@ const checkQuizAnswers = async (req, res) => {
     let score = 0;
     const totalQuestions = Object.keys(answers).length;
 
+    const selectedVariantIds = Object.values(answers);
+const variants = await Variant.find({ _id: { $in: selectedVariantIds } });
+
+
     // Variantlarni tekshirish
     for (const [questionId, selectedVariantId] of Object.entries(answers)) {
       if (!mongoose.Types.ObjectId.isValid(selectedVariantId)) {
         return res.status(400).json({ error: 'Invalid variantId' });
       }
 
+      const variant = variants.find(variant => variant._id.toString() === selectedVariantId);
+
       // Tanlangan variantni topish
-      const variant = await Variant.findOne({ _id: selectedVariantId });
+      // const variant = await Variant.findOne({ _id: selectedVariantId });
 
       if (!variant) {
         return res.status(404).json({ error: 'Variant not found' });
