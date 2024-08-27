@@ -30,14 +30,15 @@ const getResultByUserId = async (req, res) => {
 // Foydalanuvchi va uning natijalarini o'chirish
 const deleteUserAndResults = async (req, res) => {
   try {
-    const { userId } = req.params;
-console.log(userId);
+    const { id } = req.params;
+   
+console.log(id);
 
     // Foydalanuvchining natijalarini o'chirish
-    await Result.deleteMany({ userId });
+    await Result.deleteMany({ id });
 
     // Foydalanuvchini o'chirish
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findByIdAndDelete(id);
 
     if (!user) {
       return res.status(404).json({ message: 'Foydalanuvchi topilmadi' });

@@ -13,7 +13,6 @@ const AdminPanel = () => {
   const [newOptions, setNewOptions] = useState(['', '', '', '']);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const navigate = useNavigate();
-  const [Id, setId] = useState(null)
 
   const token = localStorage.getItem('token');
 
@@ -51,8 +50,6 @@ const AdminPanel = () => {
         .catch((error) => console.error('Fanlarni olishda xatolik:', error));
     }
   }, [activeTab]);
-  console.log(users);
-  
 
   const deleteQuestions = () => {
     axiosInstance
@@ -63,15 +60,15 @@ const AdminPanel = () => {
       })
       .catch((error) => console.error('Savollarni o\'chirishda xatolik:', error));
   };
-  const deleteUser = (id) => {
-    setId(id)
+
+  const deleteUser = (Id) => {
     axiosInstance
-      .delete(`http://localhost:5000/api/result/${Id}`, Id)
+      .delete(`http://localhost:5000/api/result/${Id}`)
       .then((response) => {
-        alert('Foydalanuvchi  o\'chirildi');
-        
+        alert('Foydalanuvchi o\'chirildi');
+        setUsers(users.filter((user) => user.userId && user.userId._id !== Id)); // Update users list after deletion
       })
-      .catch((error) => console.error('Savollarni o\'chirishda xatolik:', error));
+      .catch((error) => console.error('Foydalanuvchini o\'chirishda xatolik:', error));
   };
 
   const handleSubmit = () => {
@@ -181,37 +178,41 @@ const AdminPanel = () => {
         {activeTab === 'users' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Foydalanuvchilar ro'yxati</h2>
-            <table className="min-w-full table-auto">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-4 py-2 text-left">Ism</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">To'plagan ballari</th>
-                  <th className="px-4 py-2 text-left">Foizi</th>
-                  <th className="px-4 py-2 text-left">Foydalanuvchi</th>
-                </tr>
-              </thead>
-              <tbody>
-  {users.map((user, index) => (
-    <tr key={index} className="bg-gray-100">
-      <td className="border px-4 py-2">{user.userId ? user.userId.name : 'N/A'}</td>
-      <td className="border px-4 py-2">{user.userId ? user.userId.email : 'N/A'}</td>
-      <td className="border px-4 py-2">{user.score}</td>
-      <td className="border px-4 py-2">{user.percentage}</td>
-      <td className="border px-4 py-2">{user.userId._id}</td>
-      <td className="border px-4 py-2">
-        <button
-          onClick={() => deleteUser(user.userId._id)}
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-        >
-          O'chirish
-        </button>
-      </td>
-    </tr>
-  ))}
-</tbody>
-
-            </table>
+            {users.length === 0 ? (
+              <p className="text-center text-gray-500">Foydalanuvchilar yo'q</p>
+            ) : (
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Ism</th>
+                    <th className="px-4 py-2 text-left">Email</th>
+                    <th className="px-4 py-2 text-left">To'plagan ballari</th>
+                    <th className="px-4 py-2 text-left">Foizi</th>
+                    <th className="px-4 py-2 text-left">Foydalanuvchi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user, index) => (
+                    <tr key={index} className="bg-gray-100">
+                      <td className="border px-4 py-2">{user.userId ? user.userId.name : 'N/A'}</td>
+                      <td className="border px-4 py-2">{user.userId ? user.userId.email : 'N/A'}</td>
+                      <td className="border px-4 py-2">{user.score}</td>
+                      <td className="border px-4 py-2">{user.percentage}</td>
+                      <td className="border px-4 py-2">{user.userId ? user.userId._id : 'N/A'}</td>
+                      <td className="border px-4 py-2">
+                        <button
+                          onClick={() => deleteUser(user.userId ? user.userId._id : null)}
+                          className="bg-red-500 text-white px-2 py-1 rounded"
+                          disabled={!user.userId} // Disable button if user.userId is null
+                        >
+                          O'chirish
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 
@@ -220,79 +221,71 @@ const AdminPanel = () => {
             <h2 className="text-xl font-bold mb-4">Savollar ro'yxati</h2>
             <button
               onClick={() => setShowModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="bg-green-500 text-white px-4 py-2 rounded mb-4"
             >
               Yangi Savol Qo'shish
             </button>
-            <table className="min-w-full table-auto mt-4">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-4 py-2 text-left">Savol</th>
-                  <th className="px-8 py-2 text-left">Variantlar</th>
-                  <th className="px-8 py-2 text-left">Amallar</th>
-                </tr>
-              </thead>
-              <tbody>
-                {questions.map((question, index) => (
-                  <tr key={index} className="bg-gray-100">
-                    <td className="border px-4 py-2">{question.text}</td>
-                    <td className="border px-4 py-2">
-                      {question.variants.map((variant, idx) => (
-                        <div key={idx}>{variant.text}</div>
+            {questions.length === 0 ? (
+              <p className="text-center text-gray-500">Savollar yo'q</p>
+            ) : (
+              <ul>
+                {questions.map((question) => (
+                  <li key={question._id} className="border-b border-gray-300 py-2">
+                    <div className="font-bold">{question.text}</div>
+                    <ul className="list-disc pl-5">
+                      {question.variants.map((variant, index) => (
+                        <li key={index} className={`${variant.isCorrect ? 'font-bold' : ''}`}>
+                          {variant.text}
+                        </li>
                       ))}
-                    </td>
-                    <td className="border px-4 py-2">
-                      <button
-                        onClick={() => openUpdateModal(question)}
-                        className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
-                      >
-                        Yangilash
-                      </button>
-                    </td>
-                  </tr>
+                    </ul>
+                    <button
+                      onClick={() => openUpdateModal(question)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded mt-2"
+                    >
+                      Yangilash
+                    </button>
+                  </li>
                 ))}
-              </tbody>
-            </table>
+              </ul>
+            )}
           </div>
         )}
 
         {activeTab === 'subjects' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Fanlar ro'yxati</h2>
-            <table className="min-w-full table-auto">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-4 py-2 text-left">Fanning nomi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subjects.map((subject, index) => (
-                  <tr key={index} className="bg-gray-100">
-                    <td className="border px-4 py-2">{subject.name}</td>
-                  </tr>
+            {subjects.length === 0 ? (
+              <p className="text-center text-gray-500">Fanlar yo'q</p>
+            ) : (
+              <ul>
+                {subjects.map((subject) => (
+                  <li key={subject._id} className="border-b border-gray-300 py-2">
+                    {subject.name}
+                  </li>
                 ))}
-              </tbody>
-            </table>
+              </ul>
+            )}
           </div>
         )}
       </div>
 
       {/* Modal for adding new question */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h3 className="text-lg font-bold mb-4">Yangi Savol Qo'shish</h3>
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Yangi Savol Qo'shish</h2>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Savol:</label>
+              <label className="block text-gray-700">Savol:</label>
               <input
                 type="text"
                 value={newQuestion}
                 onChange={(e) => setNewQuestion(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="border rounded w-full px-3 py-2"
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Variantlar:</label>
+              <label className="block text-gray-700">Variantlar:</label>
               {newOptions.map((option, index) => (
                 <input
                   key={index}
@@ -300,42 +293,44 @@ const AdminPanel = () => {
                   value={option}
                   onChange={(e) => handleOptionChange(index, e.target.value)}
                   placeholder={`Variant ${index + 1}`}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                  className="border rounded w-full px-3 py-2 mb-2"
                 />
               ))}
             </div>
-            <button
-              onClick={handleSubmit}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Qo'shish
-            </button>
-            <button
-              onClick={() => setShowModal(false)}
-              className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 ml-2"
-            >
-              Yopish
-            </button>
+            <div className="flex justify-between">
+              <button
+                onClick={handleSubmit}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Saqlash
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Yopish
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Modal for updating question */}
-      {showUpdateModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h3 className="text-lg font-bold mb-4">Savolni Yangilash</h3>
+      {showUpdateModal && currentQuestion && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Savolni Yangilash</h2>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Savol:</label>
+              <label className="block text-gray-700">Savol:</label>
               <input
                 type="text"
                 value={newQuestion}
                 onChange={(e) => setNewQuestion(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="border rounded w-full px-3 py-2"
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Variantlar:</label>
+              <label className="block text-gray-700">Variantlar:</label>
               {newOptions.map((option, index) => (
                 <input
                   key={index}
@@ -343,22 +338,24 @@ const AdminPanel = () => {
                   value={option}
                   onChange={(e) => handleOptionChange(index, e.target.value)}
                   placeholder={`Variant ${index + 1}`}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                  className="border rounded w-full px-3 py-2 mb-2"
                 />
               ))}
             </div>
-            <button
-              onClick={handleUpdateQuestion}
-              className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
-            >
-              Yangilash
-            </button>
-            <button
-              onClick={() => setShowUpdateModal(false)}
-              className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 ml-2"
-            >
-              Yopish
-            </button>
+            <div className="flex justify-between">
+              <button
+                onClick={handleUpdateQuestion}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Yangilash
+              </button>
+              <button
+                onClick={() => setShowUpdateModal(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Yopish
+              </button>
+            </div>
           </div>
         </div>
       )}
