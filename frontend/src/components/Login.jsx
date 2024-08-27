@@ -15,10 +15,11 @@ const Login = () => {
 
       if (response.status === 200) {
         const { token, user } = response.data;
+console.log(user)
 
         // Token va user ma'lumotlarini localStorage ga saqlash
         localStorage.setItem('token', token);
-        localStorage.setItem('userID', JSON.stringify(user.id));
+        localStorage.setItem('userID', user.id);
 
         if (user.role === true) {
           // Admin panelga yo'naltirish

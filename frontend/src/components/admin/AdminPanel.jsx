@@ -42,6 +42,7 @@ const AdminPanel = () => {
         })
         .catch((error) => console.error('Savollarni olishda xatolik:', error));
     }
+    console.log(users)
 
     // Fanlar ro'yxatini olish
     if (activeTab === 'subjects') {
@@ -161,7 +162,7 @@ const AdminPanel = () => {
                   <th className="px-4 py-2">Ism</th>
                   <th className="px-4 py-2">Email</th>
                   <th className="px-4 py-2">To'plagan ballari</th>
-                  <th className="px-4 py-2">Sinf</th>
+                  <th className="px-4 py-2">Foizi</th>
                 </tr>
               </thead>
               <tbody>
@@ -170,7 +171,7 @@ const AdminPanel = () => {
                     <td className="px-4 py-2">{user.userId.name}</td>
                     <td className="px-4 py-2">{user.userId.email}</td>
                     <td className="px-4 py-2">{user.score}</td>
-                    <td className="px-4 py-2">{user.class}</td>
+                    <td className="px-4 py-2">{user.percentage}</td>
                   </tr>
                 ))}
               </tbody>
@@ -217,7 +218,7 @@ const AdminPanel = () => {
                         O'chirish
                       </button>
                     </td>
-                    <td className="px-8 py-2">{question.subject}</td>
+                    <td className="px-8 py-2">{question.fanName}</td>
                   </tr>
                 ))}
               </tbody>

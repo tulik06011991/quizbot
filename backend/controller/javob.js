@@ -5,23 +5,10 @@ const Result = require('../Model/natijalar'); // Natijalar modelini qo'shamiz
 
 const checkQuizAnswers = async (req, res) => {
   const { userId, answers } = req.body; // answers obyekti { questionId: variantId } shaklida bo'ladi
-console.log(userId);
+
 
   try {
-
-    const validateObjectId = (userId) => {
-      // ID'ni 24 ta hex raqamli string formatida tekshiradi
-      return /^[0-9a-fA-F]{24}$/.test(userId);
-    };
-    
-    const exampleId = '66c82d10a4e9ef40e0aa350f';
-    console.log(validateObjectId(exampleId)); // true yoki false
-    
     // Foydalanuvchini tekshirish
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: 'Invalid user ID format' });
-    }
-
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -30,10 +17,14 @@ console.log(userId);
     let score = 0;
     const totalQuestions = Object.keys(answers).length;
 
-    // Savollar va variantlarni tekshirish
+    // Variantlarni tekshirish
     for (const [questionId, selectedVariantId] of Object.entries(answers)) {
+      if (!mongoose.Types.ObjectId.isValid(selectedVariantId)) {
+        return res.status(400).json({ error: 'Invalid variantId' });
+      }
+
       // Tanlangan variantni topish
-      const variant = await Variant.findOne({ _id: selectedVariantId, questionId });
+      const variant = await Variant.findOne({ _id: selectedVariantId });
 
       if (!variant) {
         return res.status(404).json({ error: 'Variant not found' });

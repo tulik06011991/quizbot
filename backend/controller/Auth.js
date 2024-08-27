@@ -1,15 +1,12 @@
 // controllers/authController.js
-const User = require('../Model/ModelSchema');
+const User = require('../Model/ModelSchema'); // Modelning to'g'ri yo'lini tekshiring
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // JWT secret key
-
-// Register controller
- // Foydalanuvchi modeli (MongoDB uchun)
-
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
+// Register controller
 const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -21,7 +18,7 @@ const register = async (req, res) => {
     }
 
     // Parolni xesh qilish
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12); // Xesh kuchaytirilgan
 
     // Yangi foydalanuvchi yaratish
     const newUser = new User({
@@ -46,55 +43,47 @@ const register = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    console.error('Registration error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-
-
-
 // Login controller
- // Foydalanuvchi modeli (MongoDB uchun)
-
-
-
- const login = async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Foydalanuvchini qidirish
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // Parolni tekshirish
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // JWT yaratish
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ 
-      token, 
-      user: { 
-        id: user._id, 
-        name: user.name, 
-        email: user.email, 
-        role: user.role 
-      } 
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     });
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-
-
-
-
 module.exports = {
   login,
   register
-}
+};
