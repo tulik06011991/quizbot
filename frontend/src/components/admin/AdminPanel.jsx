@@ -157,25 +157,35 @@ const AdminPanel = () => {
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Foydalanuvchilar ro'yxati</h2>
             <table className="min-w-full table-auto">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-4 py-2">Ism</th>
-                  <th className="px-4 py-2">Email</th>
-                  <th className="px-4 py-2">To'plagan ballari</th>
-                  <th className="px-4 py-2">Foizi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user, index) => (
-                  <tr key={index} className="bg-gray-100">
-                    <td className="px-4 py-2">{user.userId.name}</td>
-                    <td className="px-4 py-2">{user.userId.email}</td>
-                    <td className="px-4 py-2">{user.score}</td>
-                    <td className="px-4 py-2">{user.percentage}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+  <thead className="bg-gray-200">
+    <tr>
+      <th className="px-4 py-2 text-left">Ism</th>
+      <th className="px-4 py-2 text-left">Email</th>
+      <th className="px-4 py-2 text-left">To'plagan ballari</th>
+      <th className="px-4 py-2 text-left">Foizi</th>
+      <th className="px-4 py-2 text-left">Foydalanuvchi</th>
+    </tr>
+  </thead>
+  <tbody>
+    {users.map((user, index) => (
+      <tr key={index} className="bg-gray-100">
+        <td className="border px-4 py-2">{user.userId.name}</td>
+        <td className="border px-4 py-2">{user.userId.email}</td>
+        <td className="border px-4 py-2">{user.score}</td>
+        <td className="border px-4 py-2">{user.percentage}</td>
+        <td className="border px-4 py-2">
+          <button
+            onClick={() => deleteQuestion(user._id)}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            O'chirish
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
           </div>
         )}
 
