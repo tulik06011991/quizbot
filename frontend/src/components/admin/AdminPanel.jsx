@@ -189,52 +189,59 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {/* Savollar ro'yxati */}
-        {activeTab === 'questions' && (
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Savollar ro'yxati</h2>
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Yangi Savol Qo'shish
-            </button>
-            <table className="min-w-full table-auto mt-4">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-4 py-2">Savol</th>
-                  <th className="px-8 py-2">Variantlar</th>
-                  <th className="px-8 py-2">O'chirish</th>
-                  <th className="px-8 py-2">Fan nomi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {questions.map((question, index) => (
-                  <tr key={index} className="bg-gray-100">
-                    <td className="px-4 py-2">{question.text}</td>
-                    <td className="px-8 py-2">
-                      <ul>
-                        {question.variants.map((variant, idx) => (
-                          <li key={idx}>{variant.text}{variant.isCorrect?('   ','      (to`g`ri)'):(' ')}</li>
-                         
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="px-8 py-2">
-                      <button
-                        onClick={() => deleteQuestion(question._id)}
-                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                      >
-                        O'chirish
-                      </button>
-                    </td>
-                    <td className="px-8 py-2">{question.fanName}</td>
-                  </tr>
+       {/* Savollar ro'yxati */}
+{activeTab === 'questions' && (
+  <div className="bg-white shadow-md rounded-lg p-6">
+    <h2 className="text-xl font-bold mb-4">Savollar ro'yxati</h2>
+    <button
+      onClick={() => setShowModal(true)}
+      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    >
+      Yangi Savol Qo'shish
+    </button>
+    <table className="min-w-full table-auto mt-4">
+      <thead className="bg-gray-200">
+        <tr>
+          <th className="px-4 py-2 text-left">Savol</th>
+          <th className="px-8 py-2 text-left">Variantlar</th>
+          <th className="px-8 py-2 text-left">O'chirish</th>
+          <th className="px-8 py-2 text-left">Fan nomi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {questions.map((question, index) => (
+          <tr key={index} className="bg-gray-100 border-b">
+            <td className="px-4 py-2">{question.text}</td>
+            <td className="px-8 py-2">
+              <ul>
+                {question.variants.map((variant, idx) => (
+                  <li key={idx}>
+                    {variant.text}
+                    {variant.isCorrect ? (
+                      <span className="text-green-600 font-bold"> (to'g'ri)</span>
+                    ) : (
+                      <span> </span>
+                    )}
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </ul>
+            </td>
+            <td className="px-8 py-2">
+              <button
+                onClick={() => deleteQuestion(question._id)}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                O'chirish
+              </button>
+            </td>
+            <td className="px-8 py-2">{question.fanName}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
 
         {/* Yangi savol qo'shish modali */}
         {showModal && (
