@@ -43,27 +43,30 @@ const Quiz = () => {
   const handleTimerComplete = () => {
     setTimeUp(true);
   };
-const handleSubmit = async () => {
-  if (submitted) return; // Agar form yuborilgan bo'lsa, hech narsa qilmaslik
 
-  const userId = localStorage.getItem('userID');
-  if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
-    alert('Invalid user ID format');
-    return;
-  } // localStorage dan userId olish
+  const handleSubmit = async () => {
+    if (submitted) return; // Agar form yuborilgan bo'lsa, hech narsa qilmaslik
 
-  try {
-    const response = await axios.post('http://localhost:5000/test/submit', {
-      userId, // Foydalanuvchi ID
-      answers: selectedOptions // Savollar va variantlar
-    });
-    setNatija(response.data); // Natijani saqlash
-    setSubmitted(true);
-  } catch (err) {
-    alert('Failed to submit quiz. Please try again.');
-  }
-};
+    const userId = localStorage.getItem('userID');
+    if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
+      alert('Invalid user ID format');
+      return;
+    } // localStorage dan userId olish
 
+    // Format the answers to only send the variant IDs
+    const answers = Object.values(selectedOptions);
+
+    try {
+      const response = await axios.post('http://localhost:5000/test/submit', {
+        userId, // Foydalanuvchi ID
+        answers // Faqqat variant ID’lari
+      });
+      setNatija(response.data); // Natijani saqlash
+      setSubmitted(true);
+    } catch (err) {
+      alert('Failed to submit quiz. Please try again.');
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
