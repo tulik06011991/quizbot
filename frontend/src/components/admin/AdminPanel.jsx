@@ -231,7 +231,7 @@ const AdminPanel = () => {
                 onClick={() => deleteQuestion(question._id)}
                 className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
               >
-                O'chirish
+                O'zgartirish
               </button>
             </td>
             <td className="px-8 py-2">{question.fanName}</td>
