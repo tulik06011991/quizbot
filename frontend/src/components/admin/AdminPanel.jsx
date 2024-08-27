@@ -27,7 +27,7 @@ const AdminPanel = () => {
       axiosInstance
         .get('http://localhost:5000/api/results')
         .then((response) => setUsers(response.data))
-        .catch((error) => console.error('Foydalanuvchilarni olishda xatolik:', error));
+        .catch(navigate('/'));
     }
 
     if (activeTab === 'questions') {
