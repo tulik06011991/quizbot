@@ -4,7 +4,10 @@ const Auth = require('./routes/Auth')
 const fileUploadRoutes = require('./routes/Word');
 const resultRoutes = require('./routes/UserResults');
 const deleteQues = require('./routes/DeleteQues');
+const deleteUser = require('./routes/DeleteQues');
 const savolVariant = require('./routes/SavolVariant')
+const updateSavol = require('./routes/SavolVariant')
+const addSavol = require('./routes/SavolVariant')
 const Test = require('./routes/Test')
 const javob = require('./routes/javob')
 const fanlar = require('./routes/fanlar')
@@ -32,7 +35,10 @@ app.use('/parsed', express.static('parsed'));
 app.use('/api', fileUploadRoutes);
 app.use('/api', resultRoutes);
 app.use('/deleteAll', deleteQues)
+app.use('/delete/:id', deleteUser)
 app.use('/savollar', savolVariant)
+app.use('/savollar/:id', addSavol)
+app.use('/savollar/:id', updateSavol)
 app.use('/api', fanlar)
 app.use('/test', Test)
 app.use('/auth', Auth)

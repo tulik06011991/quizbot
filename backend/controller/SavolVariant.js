@@ -55,23 +55,32 @@ const addQuestion = async (req, res) => {
   }
 };
 
-// Savolni o'chirish
-const deleteQuestion = async (req, res) => {
-  const { id } = req.params;
+/// Savolni yangilash
+const updateQuestion = async (req, res) => {
+  const { id } = req.params; // URL dan savol ID sini olish
+  const { text, variants, fanName } = req.body; // Yangi savol ma'lumotlari
+
   try {
-    const deletedQuestion = await Question.findByIdAndDelete(id); // Savolni o'chirish
-    if (!deletedQuestion) {
+    // Savolni yangilash
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      id,
+      { text, variants, fanName },
+      { new: true } // Yangilangan savolni qaytaradi
+    );
+
+    if (!updatedQuestion) {
       return res.status(404).json({ message: 'Savol topilmadi' });
     }
-    res.status(200).json({ message: 'Savol o\'chirildi' }); // O'chirilgan savol haqida ma'lumot
+
+    res.status(200).json({ message: 'Savol yangilandi', updatedQuestion }); // Yangilangan savol haqida ma'lumot
   } catch (error) {
-    console.error('Savolni o\'chirishda xatolik:', error);
-    res.status(500).json({ message: 'Savolni o\'chirishda xatolik' });
+    console.error('Savolni yangilashda xatolik:', error);
+    res.status(500).json({ message: 'Savolni yangilashda xatolik' });
   }
 };
 
 module.exports = {
   getQuestionsWithVariants,
   addQuestion,
-  deleteQuestion,
+  updateQuestion,
 };
