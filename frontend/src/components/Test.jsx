@@ -48,15 +48,7 @@ const Quiz = () => {
     if (submitted) return; // Agar form yuborilgan bo'lsa, hech narsa qilmaslik
 
     const userId = localStorage.getItem('userID');
-<<<<<<< HEAD
-    if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
-      alert('Invalid user ID format');
-      return;
-    } // localStorage dan userId olish
 
-    // Format the answers to only send the variant IDs
-    const answers = Object.values(selectedOptions);
-=======
     // localStorage dan userId olish
 
     // Variantlarni yuborish uchun `answers` obyektini tayyorlash
@@ -65,16 +57,16 @@ const Quiz = () => {
       acc[questionIndex] = variantId;
       return acc;
     }, {});
->>>>>>> fe46b93385aaced961d2a05cae3f852433a45e54
+
 
     try {
       const response = await axios.post('http://localhost:5000/test/submit', {
         userId, // Foydalanuvchi ID
-<<<<<<< HEAD
-        answers // Faqqat variant ID’lari
-=======
+
+        
+
         answers // Savollar va variantlar
->>>>>>> fe46b93385aaced961d2a05cae3f852433a45e54
+
       });
       setNatija(response.data); // Natijani saqlash
       setSubmitted(true);
