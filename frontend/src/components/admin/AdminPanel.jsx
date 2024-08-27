@@ -198,7 +198,7 @@ const AdminPanel = () => {
                       <td className="border px-4 py-2">{user.userId ? user.userId.email : 'N/A'}</td>
                       <td className="border px-4 py-2">{user.score}</td>
                       <td className="border px-4 py-2">{user.percentage}</td>
-                      <td className="border px-4 py-2">{user.userId ? user.userId._id : 'N/A'}</td>
+                     
                       <td className="border px-4 py-2">
                         <button
                           onClick={() => deleteUser(user.userId ? user.userId._id : null)}
