@@ -35,6 +35,7 @@ const deleteUserAndResults = async (req, res) => {
 console.log(id);
 
     // Foydalanuvchining natijalarini o'chirish
+    await Result.deleteMany({ userId: id });
     await Result.deleteMany({ id });
 
     // Foydalanuvchini o'chirish
