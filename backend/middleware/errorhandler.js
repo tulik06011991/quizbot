@@ -1,8 +1,12 @@
 const jwt = require('jsonwebtoken');
-const User = require('../Model/ModelSchema'); // Foydalanuvchi modelini import qilish
+const User = require('../Model/ModelSchema');
+require('dotenv').config();
+ // Foydalanuvchi modelini import qilish
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization']; // Tokenni frontenddan headers orqali olish
+  const token = req.headers['authorization']?.split(' ')[1]; // Bearer so'zidan keyingi haqiqiy tokenni olish
+// Tokenni frontenddan headers orqali olish
+// console.log(token)
 
   if (!token) {
     return res.status(403).json({ message: 'No token provided' }); // Token bo'lmasa xatolik berish
@@ -10,6 +14,7 @@ const verifyToken = (req, res, next) => {
 
   // Tokenni tekshirish
   jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+    console.log(err)
     if (err) {
       return res.status(401).json({ message: 'Invalid token' }); // Yaroqsiz token
     }
@@ -22,13 +27,15 @@ const verifyToken = (req, res, next) => {
         return res.status(404).json({ message: 'User not found' }); // Foydalanuvchi topilmasa
       }
 
-      // Admin bo'lsa
-      if (user.role) {
-        return res.status(200).json({ message: 'Access granted to admin panel' }); // Admin panelga kirish
+      
+      if (user.role ===true) {
+         next(); // Admin panelga kirish
+      }else{
+        return res.status(401).json("admin emassiz")
       }
 
       // User bo'lsa
-      return res.status(201).json({ message: 'Access granted to user panel' }); // Foydalanuvchi paneliga kirish
+      
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: 'Server error' });

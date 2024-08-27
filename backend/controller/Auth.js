@@ -31,7 +31,7 @@ const register = async (req, res) => {
     await newUser.save();
 
     // JWT yaratish
-    const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.status(201).json({
       token,

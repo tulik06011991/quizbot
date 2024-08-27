@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const router = express.Router();
 const quizController = require('../controller/Word');
-const middleware = require('../middleware/errorhandler')
+const verifyToken = require('../middleware/errorhandler')
 
 // Multer sozlamalari
 const storage = multer.diskStorage({
@@ -19,6 +19,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Quiz yaratish uchun route
-router.post('/create',   upload.single('file'), quizController.createQuiz);
+router.post('/create', verifyToken,  upload.single('file'), quizController.createQuiz);
 
 module.exports = router;

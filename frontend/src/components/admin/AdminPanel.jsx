@@ -42,6 +42,8 @@ const AdminPanel = () => {
         })
         .catch((error) => console.error('Savollarni olishda xatolik:', error));
     }
+    console.log(questions);
+    
 
     if (activeTab === 'subjects') {
       axiosInstance
@@ -50,6 +52,7 @@ const AdminPanel = () => {
         .catch((error) => console.error('Fanlarni olishda xatolik:', error));
     }
   }, [activeTab]);
+console.log(users, 'oxshamadi');
 
   const deleteQuestions = () => {
     axiosInstance
@@ -149,19 +152,19 @@ const AdminPanel = () => {
           </li>
           <li
             onClick={() => setActiveTab('questions')}
-            className={`cursor-pointer py-2 rounded mt-4 px-2 ${activeTab === 'questions' ? 'bg-gray-600' : ''}`}
+            className={`cursor-pointer py-2 ${activeTab === 'questions' ? 'bg-gray-600' : ''}`}
           >
             Savollar
           </li>
           <li
             onClick={() => deleteQuestions()}
-            className="cursor-pointer py-2 rounded mt-4 px-2"
+            className="cursor-pointer py-2"
           >
             Umumiy Savollarni O'chirish
           </li>
           <li
             onClick={() => setActiveTab('subjects')}
-            className={`cursor-pointer py-2 rounded mt-4 px-2 ${activeTab === 'subjects' ? 'bg-gray-600' : ''}`}
+            className={`cursor-pointer py-2 ${activeTab === 'subjects' ? 'bg-gray-600' : ''}`}
           >
             Fanlar
           </li>
@@ -316,7 +319,8 @@ const AdminPanel = () => {
       )}
 
       {/* Modal for updating question */}
-      {showUpdateModal && currentQuestion && (
+            {/* Modal for updating question */}
+            {showUpdateModal && currentQuestion && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Savolni Yangilash</h2>
@@ -364,3 +368,4 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
+
