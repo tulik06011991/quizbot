@@ -1,6 +1,6 @@
 // controllers/authController.js
 const User = require('../Model/ModelSchema'); // Modelning to'g'ri yo'lini tekshiring
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // JWT secret key
