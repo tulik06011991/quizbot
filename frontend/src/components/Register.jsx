@@ -6,11 +6,12 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      setErrorMessage('Passwords do not match!');
       return;
     }
 
@@ -30,20 +31,20 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-600 flex items-center justify-center">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create an Account</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Create an Account</h2>
 
         <form onSubmit={handleSubmit}>
           {/* Name input */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="name">
               Name
             </label>
             <input
               type="text"
               id="name"
-              className="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+              className="w-full px-4 py-3 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -53,13 +54,13 @@ const Register = () => {
 
           {/* Email input */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
               Email
             </label>
             <input
               type="email"
               id="email"
-              className="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+              className="w-full px-4 py-3 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -69,13 +70,13 @@ const Register = () => {
 
           {/* Password input */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
               Password
             </label>
             <input
               type="password"
               id="password"
-              className="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+              className="w-full px-4 py-3 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -85,13 +86,13 @@ const Register = () => {
 
           {/* Confirm Password input */}
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirmPassword">
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="confirmPassword">
               Confirm Password
             </label>
             <input
               type="password"
               id="confirmPassword"
-              className="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+              className="w-full px-4 py-3 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Confirm your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -99,11 +100,16 @@ const Register = () => {
             />
           </div>
 
+          {/* Error message */}
+          {errorMessage && (
+            <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
+          )}
+
           {/* Submit button */}
           <div className="mb-4">
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
             >
               Register
             </button>
@@ -113,7 +119,7 @@ const Register = () => {
         {/* Already have an account link */}
         <p className="text-center text-gray-600">
           Already have an account?{' '}
-          <a href="/" className="text-blue-500 hover:text-blue-700">
+          <a href="/" className="text-green-500 hover:text-green-700">
             Login
           </a>
         </p>
