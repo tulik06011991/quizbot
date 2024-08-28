@@ -10,7 +10,7 @@ const Word = () => {
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);  // Faylni o'qish
   };
-
+  const token = localStorage.getItem('token');
   const handleFanChange = (e) => {
     setFan(e.target.value); // Fan nomini o'qish
   };
@@ -30,6 +30,7 @@ const Word = () => {
     try {
       await axios.post('http://localhost:5000/api/create', formData, {
         headers: {
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
