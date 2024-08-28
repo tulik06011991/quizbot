@@ -42,8 +42,6 @@ const AdminPanel = () => {
         })
         .catch((error) => console.error('Savollarni olishda xatolik:', error));
     }
-    console.log(questions);
-    
 
     if (activeTab === 'subjects') {
       axiosInstance
@@ -52,7 +50,6 @@ const AdminPanel = () => {
         .catch((error) => console.error('Fanlarni olishda xatolik:', error));
     }
   }, [activeTab]);
-console.log(users, 'oxshamadi');
 
   const deleteQuestions = () => {
     axiosInstance
@@ -69,7 +66,7 @@ console.log(users, 'oxshamadi');
       .delete(`http://localhost:5000/api/result/${Id}`)
       .then((response) => {
         alert('Foydalanuvchi o\'chirildi');
-        setUsers(users.filter((user) => user.userId && user.userId._id !== Id)); // Update users list after deletion
+        setUsers(users.filter((user) => user.userId && user.userId._id !== Id));
       })
       .catch((error) => console.error('Foydalanuvchini o\'chirishda xatolik:', error));
   };
@@ -179,44 +176,44 @@ console.log(users, 'oxshamadi');
 
       <div className="w-full lg:w-3/4 bg-gray-100 p-6">
         {activeTab === 'users' && (
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Foydalanuvchilar ro'yxati</h2>
-            {users.length === 0 ? (
-              <p className="text-center text-gray-500">Foydalanuvchilar yo'q</p>
-            ) : (
-              <table className="min-w-full table-auto">
-                <thead className="bg-gray-200">
-                  <tr>
-                    <th className="px-4 py-2 text-left">Ism</th>
-                    <th className="px-4 py-2 text-left">Email</th>
-                    <th className="px-4 py-2 text-left">To'plagan ballari</th>
-                    <th className="px-4 py-2 text-left">Foizi</th>
-                    <th className="px-4 py-2 text-left">Foydalanuvchi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user, index) => (
-                    <tr key={index} className="bg-gray-100">
-                      <td className="border px-4 py-2">{user.userId ? user.userId.name : 'N/A'}</td>
-                      <td className="border px-4 py-2">{user.userId ? user.userId.email : 'N/A'}</td>
-                      <td className="border px-4 py-2">{user.score}</td>
-                      <td className="border px-4 py-2">{user.percentage}</td>
-                     
-                      <td className="border px-4 py-2">
-                        <button
-                          onClick={() => deleteUser(user.userId ? user.userId._id : null)}
-                          className="bg-red-500 text-white px-2 py-1 rounded"
-                          disabled={!user.userId} // Disable button if user.userId is null
-                        >
-                          O'chirish
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+         <div className="bg-white shadow-md rounded-lg p-6 overflow-x-auto">
+         <h2 className="text-xl font-bold mb-4">Foydalanuvchilar ro'yxati</h2>
+         {users.length === 0 ? (
+           <p className="text-center text-gray-500">Foydalanuvchilar yo'q</p>
+         ) : (
+           <table className="min-w-full table-auto">
+             <thead className="bg-gray-200">
+               <tr>
+                 <th className="px-4 py-2 text-left">Ism</th>
+                 
+                 <th className="px-4 py-2 text-left">To'plagan ballari</th>
+                 <th className="px-4 py-2 text-left">Foizi</th>
+                 <th className="px-4 py-2 text-left">Amallar</th>
+               </tr>
+             </thead>
+             <tbody>
+               {users.map((user, index) => (
+                 <tr key={index} className="bg-gray-100">
+                   <td className="border px-4 py-2">{user.userId ? user.userId.name : 'N/A'}</td>
+                  
+                   <td className="border px-4 py-2">{user.score}</td>
+                   <td className="border px-4 py-2">{user.percentage}</td>
+                   <td className="border px-4 py-2">
+                     <button
+                       onClick={() => deleteUser(user.userId ? user.userId._id : null)}
+                       className="bg-red-500 text-white px-2 py-1 rounded"
+                       disabled={!user.userId}
+                     >
+                       O'chirish
+                     </button>
+                   </td>
+                 </tr>
+               ))}
+             </tbody>
+           </table>
+         )}
+       </div>
+       
         )}
 
         {activeTab === 'questions' && (
@@ -224,148 +221,68 @@ console.log(users, 'oxshamadi');
             <h2 className="text-xl font-bold mb-4">Savollar ro'yxati</h2>
             <button
               onClick={() => setShowModal(true)}
-              className="bg-green-500 text-white px-4 py-2 rounded mb-4"
+              className="bg-blue-600 text-white px-4 py-2 rounded mb-4"
             >
               Yangi Savol Qo'shish
             </button>
-            {questions.length === 0 ? (
-              <p className="text-center text-gray-500">Savollar yo'q</p>
-            ) : (
-              <ul>
-                {questions.map((question) => (
-                  <li key={question._id} className="border-b border-gray-300 py-2">
-                    <div className="font-bold">{question.text}</div>
-                    <ul className="list-disc pl-5">
-                      {question.variants.map((variant, index) => (
-                        <li key={index} className={`${variant.isCorrect ? 'font-bold' : ''}`}>
-                          {variant.text}
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      onClick={() => openUpdateModal(question)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded mt-2"
-                    >
-                      Yangilash
-                    </button>
-                  </li>
+            <table className="min-w-full table-auto">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="px-4 py-2 text-left">Savol</th>
+                  <th className="px-4 py-2 text-left">Variantlar</th>
+                  <th className="px-4 py-2 text-left">Yangilash</th>
+                </tr>
+              </thead>
+              <tbody>
+                {questions.map((question, index) => (
+                  <tr key={index} className="bg-gray-100">
+                    <td className="border px-4 py-2">{question.text}</td>
+                    <td className="border px-4 py-2">
+                      <ul className="list-disc list-inside">
+                        {question.variants.map((variant, idx) => (
+                          <li key={idx} className={variant.isCorrect ? 'font-bold text-green-600' : ''}>
+                            {variant.text}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className="border px-4 py-2">
+                      <button
+                        onClick={() => openUpdateModal(question)}
+                        className="bg-green-500 text-white px-2 py-1 rounded"
+                      >
+                        Yangilash
+                      </button>
+                    </td>
+                  </tr>
                 ))}
-              </ul>
-            )}
+              </tbody>
+            </table>
           </div>
         )}
 
         {activeTab === 'subjects' && (
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Fanlar ro'yxati</h2>
-            {subjects.length === 0 ? (
-              <p className="text-center text-gray-500">Fanlar yo'q</p>
-            ) : (
-              <ul>
-                {subjects.map((subject) => (
-                  <li key={subject._id} className="border-b border-gray-300 py-2">
-                    {subject.name}
-                  </li>
+            <table className="min-w-full table-auto">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="px-4 py-2 text-left">Fan nomi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subjects.map((subject, index) => (
+                  <tr key={index} className="bg-gray-100">
+                    <td className="border px-4 py-2">{subject.name}</td>
+                  </tr>
                 ))}
-              </ul>
-            )}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
-
-      {/* Modal for adding new question */}
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Yangi Savol Qo'shish</h2>
-            <div className="mb-4">
-              <label className="block text-gray-700">Savol:</label>
-              <input
-                type="text"
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                className="border rounded w-full px-3 py-2"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Variantlar:</label>
-              {newOptions.map((option, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  placeholder={`Variant ${index + 1}`}
-                  className="border rounded w-full px-3 py-2 mb-2"
-                />
-              ))}
-            </div>
-            <div className="flex justify-between">
-              <button
-                onClick={handleSubmit}
-                className="bg-green-500 text-white px-4 py-2 rounded"
-              >
-                Saqlash
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded"
-              >
-                Yopish
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal for updating question */}
-            {/* Modal for updating question */}
-            {showUpdateModal && currentQuestion && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Savolni Yangilash</h2>
-            <div className="mb-4">
-              <label className="block text-gray-700">Savol:</label>
-              <input
-                type="text"
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                className="border rounded w-full px-3 py-2"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Variantlar:</label>
-              {newOptions.map((option, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  placeholder={`Variant ${index + 1}`}
-                  className="border rounded w-full px-3 py-2 mb-2"
-                />
-              ))}
-            </div>
-            <div className="flex justify-between">
-              <button
-                onClick={handleUpdateQuestion}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                Yangilash
-              </button>
-              <button
-                onClick={() => setShowUpdateModal(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded"
-              >
-                Yopish
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default AdminPanel;
-
